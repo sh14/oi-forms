@@ -22,10 +22,13 @@ function is_json( $data ) {
 	return json_last_error() == JSON_ERROR_NONE;
 }
 
+require 'includes/templating.php';
 require 'forms.php';
 require 'shortcode.php';
 require 'ajax.php';
 require 'rest-api.php';
+// require forms from active theme
+require_all_in(get_stylesheet().'/'.get_plugin_name());
 
 
 /**
@@ -74,6 +77,45 @@ function get_forms( $data ) {
 	];
 }
 
+/**
+ * Подключение всех файлов из указанной папки
+ *
+ * @param $dir
+ */
+function require_all_in( $dir ) {
+
+	$dir = '/' . trim( $dir, '/' ) . '/';
+
+	if ( is_dir( $dir ) ) {
+		$files = scandir( $dir );
+//		print '<pre class="hidden">';
+//		print_r( $dir );
+//		print_r( $files );
+//		print '</pre>';
+
+		if ( ! empty( $files ) && is_array( $files ) ) {
+
+			// перебор файлов в папке
+			foreach ( $files as $filename ) {
+				$path = $dir . $filename;
+
+				if ( file_exists( $path ) && is_file( $path ) ) {
+
+					// опреление расширения файла
+					$ext = explode( '.', $filename );
+					$ext = end( $ext );
+
+					// если это php файл
+					if ( 'php' == $ext ) {
+
+						// файл подключается
+						require $path;
+					}
+				}
+			}
+		}
+	}
+}
 
 
 /**
