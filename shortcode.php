@@ -81,6 +81,7 @@ function update_forms() {
 			}
 		}
 	}
+	return false;
 }
 
 add_action( 'init', __NAMESPACE__ . '\update_forms' );
