@@ -15,7 +15,11 @@
 namespace forms;
 
 use WP_REST_Server;
-
+function pr($d){
+	echo '<pre>';
+	print_r($d);
+	echo '</pre>';
+}
 function is_json( $data ) {
 	json_decode( $data, true );
 
@@ -23,12 +27,15 @@ function is_json( $data ) {
 }
 
 require 'includes/templating.php';
+//require 'includes/FormBuilder.php';
 require 'forms.php';
+require 'includes/Element.php';
 require 'shortcode.php';
 require 'ajax.php';
 require 'rest-api.php';
+//echo get_stylesheet().'/'.get_plugin_name();die;
 // require forms from active theme
-require_all_in(get_stylesheet().'/'.get_plugin_name());
+require_all_in( WP_CONTENT_DIR . '/themes/' . get_stylesheet() . '/' . get_plugin_name() );
 
 
 /**
