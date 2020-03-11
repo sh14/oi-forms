@@ -6,6 +6,7 @@
 
 namespace forms;
 
+use Elements\Element;
 
 abstract class forms {
 	// имя функции, которая обрабатывает ajax запросы
@@ -58,7 +59,8 @@ abstract class forms {
 				];
 			}
 
-		} else {
+		}
+		else {
 			// если передан ключ request и при этом существует такой метод
 			if ( ! empty( $request['request'] ) && method_exists( $this, $request['request'] ) ) {
 
@@ -181,7 +183,8 @@ abstract class forms {
 
 						// к id дописывается порядковый номер
 						$field_id .= '-' . $this->ids[ $field_id ];
-					} else {
+					}
+					else {
 
 						// определяется кол-во элементов с указанным id
 						$this->ids[ $field_id ] = 1;
@@ -195,7 +198,8 @@ abstract class forms {
 
 						// к существующим классам дописвается дополнителный - селектор для JS
 						$form['fields'][ $key ]['class'] .= ' js-form-control-' . $field_id . ' ' . $field_id;
-					} else {
+					}
+					else {
 
 						// определяется класс - селектор для JS
 						$form['fields'][ $key ]['class'] = ' js-form-control-' . $field_id . ' ' . $field_id;
@@ -222,7 +226,8 @@ abstract class forms {
 
 							}
 
-						} else {
+						}
+						else {
 
 							// устанавливается значение поля
 							$form['fields'][ $key ] = $values[ $key ];
@@ -243,7 +248,8 @@ abstract class forms {
 					if ( empty( $form['fields'][ $key ]['value'] ) ) {
 						if ( ! empty( $values[ $key ]['value'] ) ) {
 							$value = $values[ $key ]['value'];
-						} else {
+						}
+						else {
 
 							// если поле числовое
 							if ( 'number' == $form['fields'][ $key ]['type'] ) {
@@ -253,16 +259,19 @@ abstract class forms {
 
 									// значение примет минимальное
 									$value = $form['fields'][ $key ]['attributes']['min'];
-								} else {
+								}
+								else {
 
 									// значение будет равно нулю
 									$value = 0;
 								}
-							} else {
+							}
+							else {
 								$value = '';
 							}
 						}
-					} else {
+					}
+					else {
 
 						// применяется определенное пользоваетлем значение
 						$value = $form['fields'][ $key ]['value'];
@@ -369,47 +378,14 @@ abstract class forms {
 	 */
 	private function get_html() {
 
-		if ( method_exists( $this, 'set_form' ) ) {
+		$form                          = $this->form;
+		$form['attributes']['class'][] = 'form';
+		$form['attributes']['class'][] = 'js-oi-forms';
+		$form['attributes']['method']  = ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method;
+		$form['attributes']['id']      = $this->id;
 
-			$form = $this->form;
-
-			// осущетваляется перебор полей
-			foreach ( $form['fields'] as $key => $field ) {
-
-				// если ключ не является индесом
-				if ( ! is_numeric( $key ) ) {
-
-					// если поле является селектбоксом
-					if ( 'select' == $form['fields'][ $key ]['type'] ) {
-
-						// значение составляется из вспомогательных атрибутов
-						$form['fields'][ $key ]['value'] = oinput( [
-							'type'  => 'option',
-							'name'  => ! empty( $form['fields'][ $key ]['options'] ) ? $form['fields'][ $key ]['options'] : [],
-							'value' => ! empty( $form['fields'][ $key ]['option_value'] ) ? $form['fields'][ $key ]['option_value'] : '',
-						] );
-					}
-				}
-			}
-
-			// определение атрибутов формы
-			$form_atts = [
-				'echo'       => false,
-				'action'     => ! empty( $this->form['action'] ) ? $this->form['action'] : '',
-				// если пользователем не установлен метод отправки данных, он определяется по умолчанию
-				'method'     => ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method,
-				'id'         => $this->id,
-				'attributes' => [
-					'class' => 'form',
-				],
-			];
-
-			$form_atts['attributes']['class'] .= ! empty( $this->form_class ) ? ' ' . $this->form_class : '';
-			$form_atts['attributes']['class'] .= ' js-oi-forms';
-
-			// опеределение переменной заполненной html данными формы
-			$this->data = oinput_form( $form['fields'], $form_atts );
-		}
+		pr( $form['fields'] );
+		$this->data = Element::get( $form['fields'] );
 	}
 
 	/**
