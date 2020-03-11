@@ -5,27 +5,18 @@
  */
 
 
-namespace forms;
+namespace Elements;
 
 
-abstract class abstractField {
+class Element {
 	public static $attributes = [];
+	public static $ids = [];
+	public static $id = '';
+	public static $errors = [];
 
 	protected static function init() {
-		self::$attributes = self::attributes();
-	}
 
-	/**
-	 * указание вида элемента - парный(с закрывающим тегом) или одиночный
-	 *
-	 * @return array
-	 */
-	protected static function elements() {
-		return [
-			'select' => [
-				'single' => false,
-			],
-		];
+		self::$attributes = self::attributes();
 	}
 
 	protected static function attributes() {
@@ -41,6 +32,18 @@ abstract class abstractField {
 				'required'  => false,
 			],
 			'disabled'  => [
+				'type'      => 'Boolean',
+				'default'   => false,
+				'hideEmpty' => true,
+				'required'  => false,
+			],
+			'selected'  => [
+				'type'      => 'Boolean',
+				'default'   => false,
+				'hideEmpty' => true,
+				'required'  => false,
+			],
+			'checked'   => [
 				'type'      => 'Boolean',
 				'default'   => false,
 				'hideEmpty' => true,
@@ -70,6 +73,12 @@ abstract class abstractField {
 				'hideEmpty' => true,
 				'required'  => false,
 			],
+			'id'        => [
+				'type'      => 'String',
+				'default'   => '',
+				'hideEmpty' => true,
+				'required'  => true,
+			],
 			'name'      => [
 				'type'      => 'String',
 				'default'   => '',
@@ -95,37 +104,36 @@ abstract class abstractField {
 	}
 
 	/**
-	 * обработка атрибутов тега
+	 * Обработка атрибутов тега
 	 *
-	 * @param        $elementAttributes
+	 * @param array  $element
 	 * @param array  $attributesList
 	 * @param string $prefix
 	 *
-	 * @return array
+	 * @return array - список строк вида 'ключ="значение"'
 	 */
-	private static function processAttributes( $elementAttributes, $attributesList = [], $prefix = '' ) {
+	private static function processAttributes( array $element, $attributesList = [], $prefix = '' ) {
 
-		$keyPrefix = '';
+		// если указан префикс, атрибут составной
+		$keyPrefix = ! empty( $prefix ) ? $prefix . '-' : '';
 
-		// получение определенного списка атрибутов по умолчанию
-		$attributes = self::$attributes;
+		if ( ! empty( $element['attributes'] ) ) {
 
-		// перебор пользовательских атрибутов
-		foreach ( $elementAttributes as $key => $value ) {
+			$attributes = self::attributes();
 
-			// определение имени вероятно существующего метода
-			$method = $key . 'Attribute';
+			// перебор пользовательских атрибутов
+			foreach ( $element['attributes'] as $key => $value ) {
+				$key = strtolower( $key );
 
-			// определение имени класса из которого вызывается абстракция
-			$called_class_name = get_called_class();
+				// if element has default attributes
+				if ( ! empty( $attributes[ $key ] ) ) {
+					// if attribute should be an array and default attribute has delimiter and given attribute is not an array
+					if ( 'array' == $attributes[ $key ]['type'] && ! empty( $attributes[ $key ]['delimiter'] ) && ! is_array( $value ) ) {
+						// convert value to array with given delimiter
+						$value = explode( $attributes[ $key ]['delimiter'], $value );
+					}
+				}
 
-			// если в вызванном классе(дочернем) существует метод для обработки атрибута
-			if ( method_exists( $called_class_name, $method ) ) {
-
-				// вызывается метод для обработки указанного атрибута
-				$attributesList[] = $called_class_name::$method( $value );
-			} // атрибут обрабатывается обычным способом
-			else {
 				// если значение атрибута является массивом, значит это составной атрибут, типа data
 				if ( is_array( $value ) ) {
 
@@ -147,17 +155,18 @@ abstract class abstractField {
 
 						// массив преобразуется в строку, разделенную указанным разделителем
 						$value = implode( $delimiter, self::processAttributeValues( $value, $delimiters ) );
-					} else {
+					}
+					else {
 
 						// метод перебирает вложенный список
-						$attributesList = self::processAttributes( $value, $attributesList, $key );
+						$attributesList = self::processAttributes( $value, $attributesList, $keyPrefix . $key );
 
 						// осуществляется переход к следующей итерации
 						continue;
 					}
 				}
 
-				// если элемент не определен или указан префикс, значит идет перебор пользовательских атрибутов
+				// если элемент не определен по умолчанию или указан префикс, значит идет перебор пользовательских атрибутов
 				if ( empty( $attributes[ $key ] ) || ! empty( $prefix ) ) {
 
 					// тип атрибута переопределяется на строку
@@ -170,17 +179,15 @@ abstract class abstractField {
 					$attributes[ $key ]['required'] = false;
 				}
 
-				// если указан префикс, атрибут составной
-				if ( ! empty( $prefix ) ) {
-
-					$keyPrefix = $prefix . '-';
-				}
 
 				// если атрибут обязателен и он пуст
-				if ( true == $attributes[ $key ]['required'] && empty( $value ) ) {
+				if ( true == $attributes[ $key ]['required'] && false === $attributes[ $key ]['hideEmpty'] && empty( $value ) ) {
 
-					// возвращается информация об ошибке для вставкив sprintf
-					return [ 'error' => [ 'Key "%s" is required.', $key ], ];
+					// add an error
+					self::$errors[] = __( sprintf( 'Key "%s" is required.', $key ), __NAMESPACE__ );
+
+					// return empty value
+					return [];
 				}
 
 				// если значение определено как пустое или не указано
@@ -191,7 +198,8 @@ abstract class abstractField {
 
 						// осуществляется переход к следующей итерации
 						continue;
-					} else // если указано значение по умолчанию
+					}
+					else // если указано значение по умолчанию
 						if ( ! empty( $attributes[ $key ]['default'] ) ) {
 
 							// значение по умолчанию устанавливается в качестве значения
@@ -226,6 +234,26 @@ abstract class abstractField {
 						$attributesList[] = $key . '="' . htmlspecialchars( $value ) . '"';
 						break;
 				}
+
+				// if element has "name" attribute and donn't has "id"
+				if ( 'name' == $key && empty( $element['attributes']['id'] ) ) {
+					$id = $element['attributes']['name'];
+					$id = str_replace( '[]', '!', $id );
+					if ( ! isset( self::$ids[ $id ] ) ) {
+						self::$ids[ $id ] = 0;
+						// if ! at the end, then don't put -
+						self::$id = strpos( $id, '!' ) == strlen( $id ) - 1 ? str_replace( '!', '', $id ) : str_replace( '!', '-', $id );
+					}
+					else {
+						self::$ids[ $id ] ++;
+						// if ! at the end, then don't put -
+						self::$id = strpos( $id, '!' ) == strlen( $id ) - 1 ? str_replace( '!', '', $id ) : str_replace( '!', '-', $id );
+						self::$id .= '-' . self::$ids[ $id ];
+					}
+
+					$attributesList[] = 'id="' . self::$id . '"';
+				}
+
 			}
 		}
 
@@ -236,16 +264,16 @@ abstract class abstractField {
 	/**
 	 * Обработка списков значений атрибутов, например классов или стилей
 	 *
-	 * @param        $attributeValues
+	 * @param array  $attributeValues
 	 * @param string $delimiter
 	 * @param array  $values
 	 * @param string $prefix
 	 *
-	 * @return array
+	 * @return array - список строк значений, сформированных для указанного атрибута
 	 */
-	private static function processAttributeValues( $attributeValues, $delimiter = ' ', $values = [], $prefix = '' ) {
+	private static function processAttributeValues( array $attributeValues, $delimiter = ' ', $values = [], $prefix = '' ) {
 
-		$keyPrefix = '';
+//		$keyPrefix = '';
 
 		// если разделитель не массив
 		if ( ! is_array( $delimiter ) ) {
@@ -262,7 +290,8 @@ abstract class abstractField {
 
 				// берется первый разделитель - для составляющей имени значения(border-width-top)
 				$separator = $delimiter[0];
-			} else {
+			}
+			else {
 
 				// берется второй разделитель - для ключа со значением(color:red)
 				$separator = $delimiter[1];
@@ -274,18 +303,21 @@ abstract class abstractField {
 
 					// определяется часть имени без индекса
 					$keyPrefix = $prefix . $separator;
-				} else {
+				}
+				else {
 
 					// определяется часть имени с ключом
 					$keyPrefix = $prefix . $key . $separator;
 				}
-			} else {
+			}
+			else {
 				// если массив нумерованный
 				if ( is_numeric( $key ) ) {
 
 					// определяется часть имени без индекса
 					$keyPrefix = '';
-				} else {
+				}
+				else {
 
 					// определяется часть имени с ключом
 					$keyPrefix = $key . $separator;
@@ -311,73 +343,108 @@ abstract class abstractField {
 	}
 
 	/**
-	 * функция формирования html элемента из массива данных
+	 * Converts an array describing an element to HTML code
 	 *
-	 * @param $element
+	 * @param array $element - an array describing an element
 	 *
-	 * @return mixed|string
+	 * @return string
 	 */
-	protected static function html( $element ) {
+	protected static function convertToHtml( array $element ) {
+		// return empty string if type not set
+		if ( empty( $element['type'] ) ) {
+			self::$errors[] = __( 'The element type was not specified.', __NAMESPACE__ );
 
-//		if(!empty($element['content'])){
-//
-//			if(is_array($element['content'])){
-//				$content = self::element($element['content']);
-//			}else{
-//				$content = $element['content'];
-//			}
-//		}else{
-//			$content = '';
-//		}
-		print_r($element);
-		print "\n";
-		$content = '';
+			return '';
+		}
+		// input types - https://www.w3schools.com/html/html_form_input_types.asp
+		$inputTypes      = [
+			'button',
+			'checkbox',
+			'color',
+			'date',
+			'datetime-local',
+			'email',
+			'file',
+			'hidden',
+			'image',
+			'month',
+			'number',
+			'password',
+			'radio',
+			'range',
+			'reset',
+			'search',
+			'submit',
+			'tel',
+			'text',
+			'time',
+			'url',
+			'week',
+		];
+		$element['type'] = strtolower( $element['type'] );
+		// if user set input type as element type
+		if ( in_array( $element['type'], $inputTypes ) ) {
+			// set type as attribute
+			$element['attributes']['type'] = $element['type'];
+			// set correct element type
+			$element['type']               = 'input';
+		}
+		// if user doesn't set type for input
+		if ( 'input' == $element['type'] && empty( $element['attributes']['type'] ) ) {
+			// set default input type
+			$element['attributes']['type'] = 'text';
+		}
+		$html = [];
+		// add element type
+		$html[] = $element['type'];
+		// if attributes has been set
+		if ( ! empty( $element['attributes'] ) ) {
+			$html[] = implode( ' ', self::processAttributes( $element ) );
+		}
 
-		// получение стандартных свойств элементов
-		$elements = self::elements();
+		// join strings to body of an element
+		$html = implode( ' ', $html );
 
-		// определение атрибутов
-		$attributes = self::processAttributes( $element['attributes'] ) ;
-
-		print_r($attributes);
-		print "\n";
-
-
-		$attributes = implode( ' ', $attributes );
-
-		// перевод списка атрибутов со значениями в строку через пробел
-		$html = implode( ' ', [ $element['type'], $attributes ] );
+		// get element content
+		$content = ! empty( $element['content'] ) ? self::get( $element['content'] ) : '';
 
 		// если элемент парный
-		if ( empty( $elements[ $element['type'] ]['single'] ) ) {
+		if ( ! in_array( $element['type'], $inputTypes ) ) {
 
 			// формирование парного элемента
 			$html = "<{$html}>{$content}</{$element['type']}>";
-		} else {
-
-			// формирование не парного элемента
-			$html = "<{$html}/>{$content}";
+		}
+		else {
+			// формирование непарного элемента
+			if ( empty( $properties['before'] ) ) {
+				$html = "<{$html}/>{$content}";
+			}
+			else {
+				$html = "{$content}<{$html}/>";
+			}
 		}
 
-		// если ключ html содержит данные
+		// if the HTML pattern exists
 		if ( ! empty( $element['html'] ) ) {
-
-			// формируется html обертка для элемента
-			$html = self::htmlProcess( $element, $html );
+			if ( ! empty( self::$id ) ) {
+				$element['vars']['id'] = self::$id;
+			}
+			// insert element to pattern
+			$html = self::useHtmlPattern( $element, $html );
 		}
 
 		return $html;
 	}
 
 	/**
-	 * Формирование html обертки для элемента
+	 * Inserting element string to given HTML pattern
 	 *
-	 * @param $element
-	 * @param $elementHtml
+	 * @param array  $element
+	 * @param string $elementHtml
 	 *
-	 * @return mixed
+	 * @return string - string of HTML code
 	 */
-	protected static function htmlProcess( $element, $elementHtml ) {
+	protected static function useHtmlPattern( array $element, $elementHtml = '' ) {
 
 		// определение html с псевдопеременными
 		$html = $element['html'];
@@ -385,14 +452,16 @@ abstract class abstractField {
 		// перебор ключей с определением приоритета замены данных(сперва замена происходит из vars, затем из attributes)
 		foreach ( [ 'vars', 'attributes' ] as $type ) {
 
-			// перебор данных из указанного источника
-			foreach ( $element[ $type ] as $key => $value ) {
+			if ( ! empty( $element[ $type ] ) ) {
+				// перебор данных из указанного источника
+				foreach ( $element[ $type ] as $key => $value ) {
 
-				// если значение не является массивом
-				if ( is_string( $value ) ) {
+					// если значение не является массивом
+					if ( is_string( $value ) ) {
 
-					// в html заменяются все вхождения указанного ключа
-					$html = str_replace( "%{$key}%", $value, $html );
+						// в html заменяются все вхождения указанного ключа
+						$html = str_replace( "%{$key}%", $value, $html );
+					}
 				}
 			}
 		}
@@ -403,6 +472,49 @@ abstract class abstractField {
 		return $html;
 	}
 
+	/**
+	 * Converting elements set to list of html elements strings
+	 *
+	 * @param string|array $data - elements set
+	 *
+	 * @return string
+	 */
+	public static function get( $data ) {
+		static::init();
 
+		// if data is not an array, it means that $data is a content like a string, label, for example
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+		// определяется список сформированных html элементов
+		$elementsList = [];
+
+		// перебор элементов
+		foreach ( $data as $i => $element ) {
+
+			// в список добавляется сформированный элемент
+			$elementsList[] = self::convertToHtml( $element );
+		}
+
+		if ( ! empty( $errors = self::isErrors() ) ) {
+
+			return $errors;
+		}
+
+		// список переводится в строку, разделенную по строкам
+		$elementsList = implode( PHP_EOL, $elementsList );
+
+		return $elementsList;
+	}
+
+	protected static function isErrors() {
+		if ( ! empty( self::$errors ) ) {
+			return join( PHP_EOL, array_map( function ( $item ) {
+				return '<p class="error">' . $item . '</p>';
+			}, self::$errors ) );
+		}
+
+		return false;
+	}
 }
 // eof
