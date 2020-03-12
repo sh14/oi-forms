@@ -87,11 +87,22 @@ $form = [
 				],
 				'html'    => '<div class="form__control">%%</div>',
 			],
+			[
+				'type'       => 'checkbox',
+				'before'       => true,
+				'content'       => 'Все правильно',
+				'attributes'=>[
+					'name'      => 'flag',
+					'value'      => 'text 4',
+				],
+				'html'    => '<div class="form__control">%%</div>',
+			],
 		],
 		'html'    => '<div class="form">%%</div>',
 	],
 ];
 
-print_r( Element::get( $form ) );
+pr( Element::prepare( $form ) );
+pr( Element::get( $form ) );
 
 // eof
