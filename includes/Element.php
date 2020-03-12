@@ -515,6 +515,90 @@ class Element {
 	}
 
 	/**
+	 * Prepare element array
+	 *
+	 * @param array $element
+	 *
+	 * @return array
+	 */
+	protected static function prepareElement( array $element ) {
+		// return empty string if type not set
+		if ( empty( $element['type'] ) ) {
+			self::$errors[] = __( 'The element type was not specified.', __NAMESPACE__ );
+
+			return [];
+		}
+
+		$element['type'] = strtolower( $element['type'] );
+
+		// if user set input type as element type
+		if ( in_array( $element['type'], self::$inputTypes ) ) {
+			// set type as attribute
+			$element['attributes']['type'] = $element['type'];
+			// set correct element type
+			$element['type'] = 'input';
+		}
+
+		// if user doesn't set type for input
+		if ( 'input' == $element['type'] && empty( $element['attributes']['type'] ) ) {
+			// set default input type
+			$element['attributes']['type'] = 'text';
+		}
+
+		// if attributes has been set
+		if ( ! empty( $element['attributes'] ) ) {
+			// prepare attributes
+			$element['attributes'] = self::prepareAttributes( $element['attributes'] );
+		}
+
+		if ( ! empty( $element['content'] ) ) {
+			$element['content'] = self::prepare( $element['content'] );
+		}
+
+
+		// if the HTML pattern exists
+		if ( ! empty( $element['html'] ) ) {
+			if ( ! empty( self::$id ) ) {
+				$element['vars']['id'] = self::$id;
+			}
+		}
+
+		return $element;
+	}
+
+	/**
+	 * Prepare all elements of given array
+	 *
+	 * @param $data
+	 *
+	 * @return array|bool|string
+	 */
+	public static function prepare( $data ) {
+		static::init();
+
+		// if data is not an array, it means that $data is a content like a string, label, for example
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+		// определяется список сформированных html элементов
+		$elementsList = [];
+
+		// перебор элементов
+		foreach ( $data as $i => $element ) {
+
+			// в список добавляется сформированный элемент
+			$elementsList[] = self::prepareElement( $element );
+		}
+
+		if ( ! empty( $errors = self::isErrors() ) ) {
+
+			return $errors;
+		}
+
+		return $elementsList;
+	}
+
+	/**
 	 * Converting elements set to list of html elements strings
 	 *
 	 * @param string|array $data - elements set
@@ -528,6 +612,10 @@ class Element {
 		if ( ! is_array( $data ) ) {
 			return $data;
 		}
+
+		// prepare data for converting to HTML
+		$data = self::prepare( $data );
+
 		// определяется список сформированных html элементов
 		$elementsList = [];
 
