@@ -13,6 +13,31 @@ class Element {
 	public static $ids = [];
 	public static $id = '';
 	public static $errors = [];
+	// input types - https://www.w3schools.com/html/html_form_input_types.asp
+	public static $inputTypes = [
+		'button',
+		'checkbox',
+		'color',
+		'date',
+		'datetime-local',
+		'email',
+		'file',
+		'hidden',
+		'image',
+		'month',
+		'number',
+		'password',
+		'radio',
+		'range',
+		'reset',
+		'search',
+		'submit',
+		'tel',
+		'text',
+		'time',
+		'url',
+		'week',
+	];
 
 	protected static function init() {
 
