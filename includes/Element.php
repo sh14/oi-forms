@@ -15,7 +15,7 @@ class Element {
 	public static $errors = [];
 	// input types - https://www.w3schools.com/html/html_form_input_types.asp
 	public static $inputTypes = [
-		'button',
+//		'button', // except button, because there is the same tag
 		'checkbox',
 		'color',
 		'date',
@@ -527,7 +527,9 @@ class Element {
 
 		// перебор элементов
 		foreach ( $data as $i => $element ) {
-
+//if(is_string($element)){
+//	echo '!!! '.$element.' ???';die;
+//}
 			// в список добавляется сформированный элемент
 			$elementsList[] = self::prepareElement( $element );
 		}
