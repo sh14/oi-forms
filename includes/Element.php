@@ -145,37 +145,37 @@ class Element {
 		// get attributes options
 		$attributes = self::attributes();
 
-			// перебор пользовательских атрибутов
-			foreach ( $elementAttributes as $key => $value ) {
-				$key = strtolower( $key );
+		// перебор пользовательских атрибутов
+		foreach ( $elementAttributes as $key => $value ) {
+			$key = strtolower( $key );
 
-				// if element has default attributes
-				if ( ! empty( $attributes[ $key ] ) ) {
-					// if attribute should be an array and default attribute has delimiter and given attribute is not an array
-					if ( 'array' == $attributes[ $key ]['type'] && ! empty( $attributes[ $key ]['delimiter'] ) && ! is_array( $value ) ) {
-						// convert value to array with given delimiter
-						$value = explode( $attributes[ $key ]['delimiter'], $value );
-					}
+			// if element has default attributes
+			if ( ! empty( $attributes[ $key ] ) ) {
+				// if attribute should be an array and default attribute has delimiter and given attribute is not an array
+				if ( 'array' == $attributes[ $key ]['type'] && ! empty( $attributes[ $key ]['delimiter'] ) && ! is_array( $value ) ) {
+					// convert value to array with given delimiter
+					$value = explode( $attributes[ $key ]['delimiter'], $value );
 				}
+			}
 
-				// если значение атрибута является массивом, значит это составной атрибут, типа data
-				if ( is_array( $value ) ) {
+			// если значение атрибута является массивом, значит это составной атрибут, типа data
+			if ( is_array( $value ) ) {
 
-					// если тип атрибута определен и он - массив, например class может быть массивом
-					if ( ! empty( $attributes[ $key ]['type'] ) && 'Array' == $attributes[ $key ]['type'] ) {
+				// если тип атрибута определен и он - массив, например class может быть массивом
+				if ( ! empty( $attributes[ $key ]['type'] ) && 'Array' == $attributes[ $key ]['type'] ) {
 
-						// определяется разделитель элементов
-						$delimiters = ! empty( $attributes[ $key ]['delimiter'] ) ? $attributes[ $key ]['delimiter'] : [ ' ' ];
+					// определяется разделитель элементов
+					$delimiters = ! empty( $attributes[ $key ]['delimiter'] ) ? $attributes[ $key ]['delimiter'] : [ ' ' ];
 
-						// если разделитель не массив
-						if ( ! is_array( $delimiters ) ) {
+					// если разделитель не массив
+					if ( ! is_array( $delimiters ) ) {
 
-							// разделитель преобразуется в массив с одним элементом
-							$delimiters = [ $delimiters ];
-						}
+						// разделитель преобразуется в массив с одним элементом
+						$delimiters = [ $delimiters ];
+					}
 
-						// если разделителей больше одного, определяется первый элемент и убирается из общего списка
-						$delimiter = sizeof( $delimiters ) > 1 ? array_shift( $delimiters ) : $delimiters[0];
+					// если разделителей больше одного, определяется первый элемент и убирается из общего списка
+					$delimiter = sizeof( $delimiters ) > 1 ? array_shift( $delimiters ) : $delimiters[0];
 
 					// массив преобразуется в строку, разделенную указанным разделителем
 					$value = implode( $delimiter, self::prepareAttributeValues( $value, $delimiters ) );
@@ -185,100 +185,100 @@ class Element {
 					// метод перебирает вложенный список
 					$attributesList = self::prepareAttributes( $value, $attributesList, $keyPrefix . $key );
 
-						// осуществляется переход к следующей итерации
-						continue;
-					}
+					// осуществляется переход к следующей итерации
+					continue;
 				}
-
-				// если элемент не определен по умолчанию или указан префикс, значит идет перебор пользовательских атрибутов
-				if ( empty( $attributes[ $key ] ) || ! empty( $prefix ) ) {
-
-					// тип атрибута переопределяется на строку
-					$attributes[ $key ]['type'] = 'String';
-
-					// атрибут не скрывается при пустом значении
-					$attributes[ $key ]['hideEmpty'] = false;
-
-					// атрибут не являются обязательными
-					$attributes[ $key ]['required'] = false;
-				}
-
-
-				// если атрибут обязателен и он пуст
-				if ( true == $attributes[ $key ]['required'] && false === $attributes[ $key ]['hideEmpty'] && empty( $value ) ) {
-
-					// add an error
-					self::$errors[] = __( sprintf( 'Key "%s" is required.', $key ), __NAMESPACE__ );
-
-					// return empty value
-					return [];
-				}
-
-				// если значение определено как пустое или не указано
-				if ( empty( $value ) ) {
-
-					// если при отсутствии значения атрибут должен скрываться
-					if ( true == $attributes[ $key ]['hideEmpty'] ) {
-
-						// осуществляется переход к следующей итерации
-						continue;
-					}
-					else // если указано значение по умолчанию
-						if ( ! empty( $attributes[ $key ]['default'] ) ) {
-
-							// значение по умолчанию устанавливается в качестве значения
-							$value = $attributes[ $key ]['default'];
-						}
-				}
-
-				// если тип атрибута
-				switch ( $attributes[ $key ]['type'] ) {
-					case 'Boolean':
-
-						// по умолчанию включен или пользователь указал не пустое значение
-						if ( true == $attributes[ $key ]['type'] || ! empty( $value ) ) {
-
-							// добавляется название атрибута
-							$attributesList[$key] = $key;
-						}
-						break;
-					case 'String':
-
-						// добавляется название атрибута с текстовым значением
-						$attributesList[ $keyPrefix . $key ] = htmlspecialchars( $value );
-						break;
-					case 'Number':
-
-						// добавляется название атрибута с числовым значением
-						$attributesList[ $key ] = floatval( $value );
-						break;
-					case 'Array':
-
-						// добавляется название атрибута с текстовым значением
-						$attributesList[ $key ] = htmlspecialchars( $value );
-						break;
-				}
-
-				// if it's not included attribute and element has "name" attribute and donn't has "id"
-				if (empty($prefix) &&'name' == $key && empty( $elementAttributes['id'] ) ) {
-					$id = $elementAttributes['name'];
-					$id = str_replace( '[]', '!', $id );
-					if ( ! isset( self::$ids[ $id ] ) ) {
-						self::$ids[ $id ] = 0;
-						// if ! at the end, then don't put -
-						self::$id = strpos( $id, '!' ) == strlen( $id ) - 1 ? str_replace( '!', '', $id ) : str_replace( '!', '-', $id );
-					}
-					else {
-						self::$ids[ $id ] ++;
-						// if ! at the end, then don't put -
-						self::$id = strpos( $id, '!' ) == strlen( $id ) - 1 ? str_replace( '!', '', $id ) : str_replace( '!', '-', $id );
-						self::$id .= '-' . self::$ids[ $id ];
-					}
-
-					$attributesList['id'] = self::$id;
-				}
-
 			}
+
+			// если элемент не определен по умолчанию или указан префикс, значит идет перебор пользовательских атрибутов
+			if ( empty( $attributes[ $key ] ) || ! empty( $prefix ) ) {
+
+				// тип атрибута переопределяется на строку
+				$attributes[ $key ]['type'] = 'String';
+
+				// атрибут не скрывается при пустом значении
+				$attributes[ $key ]['hideEmpty'] = false;
+
+				// атрибут не являются обязательными
+				$attributes[ $key ]['required'] = false;
+			}
+
+
+			// если атрибут обязателен и он пуст
+			if ( true == $attributes[ $key ]['required'] && false === $attributes[ $key ]['hideEmpty'] && empty( $value ) ) {
+
+				// add an error
+				self::$errors[] = __( sprintf( 'Key "%s" is required.', $key ), __NAMESPACE__ );
+
+				// return empty value
+				return [];
+			}
+
+			// если значение определено как пустое или не указано
+			if ( empty( $value ) ) {
+
+				// если при отсутствии значения атрибут должен скрываться
+				if ( true == $attributes[ $key ]['hideEmpty'] ) {
+
+					// осуществляется переход к следующей итерации
+					continue;
+				}
+				else // если указано значение по умолчанию
+					if ( ! empty( $attributes[ $key ]['default'] ) ) {
+
+						// значение по умолчанию устанавливается в качестве значения
+						$value = $attributes[ $key ]['default'];
+					}
+			}
+
+			// если тип атрибута
+			switch ( $attributes[ $key ]['type'] ) {
+				case 'Boolean':
+
+					// по умолчанию включен или пользователь указал не пустое значение
+					if ( true == $attributes[ $key ]['type'] || ! empty( $value ) ) {
+
+						// добавляется название атрибута
+						$attributesList[ $key ] = $key;
+					}
+					break;
+				case 'String':
+
+					// добавляется название атрибута с текстовым значением
+					$attributesList[ $keyPrefix . $key ] = htmlspecialchars( $value );
+					break;
+				case 'Number':
+
+					// добавляется название атрибута с числовым значением
+					$attributesList[ $key ] = floatval( $value );
+					break;
+				case 'Array':
+
+					// добавляется название атрибута с текстовым значением
+					$attributesList[ $key ] = htmlspecialchars( $value );
+					break;
+			}
+
+			// if it's not included attribute and element has "name" attribute and donn't has "id"
+			if ( empty( $prefix ) && 'name' == $key && empty( $elementAttributes['id'] ) ) {
+				$id = $elementAttributes['name'];
+				$id = str_replace( '[]', '!', $id );
+				if ( ! isset( self::$ids[ $id ] ) ) {
+					self::$ids[ $id ] = 0;
+					// if ! at the end, then don't put -
+					self::$id = strpos( $id, '!' ) == strlen( $id ) - 1 ? str_replace( '!', '', $id ) : str_replace( '!', '-', $id );
+				}
+				else {
+					self::$ids[ $id ] ++;
+					// if ! at the end, then don't put -
+					self::$id = strpos( $id, '!' ) == strlen( $id ) - 1 ? str_replace( '!', '', $id ) : str_replace( '!', '-', $id );
+					self::$id .= '-' . self::$ids[ $id ];
+				}
+
+				$attributesList['id'] = self::$id;
+			}
+
+		}
 
 
 		return $attributesList;
@@ -389,88 +389,30 @@ class Element {
 	 * @return string
 	 */
 	protected static function convertToHtml( array $element ) {
-		// return empty string if type not set
-		if ( empty( $element['type'] ) ) {
-			self::$errors[] = __( 'The element type was not specified.', __NAMESPACE__ );
 
-			return '';
-		}
-		// input types - https://www.w3schools.com/html/html_form_input_types.asp
-		$inputTypes      = [
-			'button',
-			'checkbox',
-			'color',
-			'date',
-			'datetime-local',
-			'email',
-			'file',
-			'hidden',
-			'image',
-			'month',
-			'number',
-			'password',
-			'radio',
-			'range',
-			'reset',
-			'search',
-			'submit',
-			'tel',
-			'text',
-			'time',
-			'url',
-			'week',
-		];
-		$element['type'] = strtolower( $element['type'] );
-		// if user set input type as element type
-		if ( in_array( $element['type'], $inputTypes ) ) {
-			// set type as attribute
-			$element['attributes']['type'] = $element['type'];
-			// set correct element type
-			$element['type'] = 'input';
-		}
-		// if user doesn't set type for input
-		if ( 'input' == $element['type'] && empty( $element['attributes']['type'] ) ) {
-			// set default input type
-			$element['attributes']['type'] = 'text';
-		}
-		$html = [];
-		// add element type
-		$html[] = $element['type'];
 		// if attributes has been set
-		if ( ! empty( $element['attributes'] ) ) {
-			$attributes = self::processAttributes( $element['attributes'] );
-			pr($attributes);
-			$attributes = self::stringifyAttributes( $attributes );
-			$html[]     = $attributes;
-		}
+		$attributes = ! empty( $element['attributes'] ) ? self::stringifyAttributes( $element['attributes'] ) : '';
 
 		// join strings to body of an element
-		$html = implode( ' ', $html );
+		$html = join( ' ', [ $element['type'], $attributes ] );
 
 		// get element content
 		$content = ! empty( $element['content'] ) ? self::get( $element['content'] ) : '';
 
 		// если элемент парный
-		if ( ! in_array( $element['type'], $inputTypes ) ) {
+		if ( ! in_array( $element['type'], ['input',] ) ) {
 
 			// формирование парного элемента
 			$html = "<{$html}>{$content}</{$element['type']}>";
 		}
 		else {
 			// формирование непарного элемента
-			if ( empty( $properties['before'] ) ) {
-				$html = "<{$html}/>{$content}";
-			}
-			else {
-				$html = "{$content}<{$html}/>";
-			}
+			$html = empty( $element['before'] ) ? "<{$html}/>{$content}" : "{$content}<{$html}/>";
 		}
 
 		// if the HTML pattern exists
 		if ( ! empty( $element['html'] ) ) {
-			if ( ! empty( self::$id ) ) {
-				$element['vars']['id'] = self::$id;
-			}
+
 			// insert element to pattern
 			$html = self::useHtmlPattern( $element, $html );
 		}
