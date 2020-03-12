@@ -21,6 +21,8 @@ abstract class forms {
 	private $form = [];
 	// отрендеренная форма в том виде, в котором запросил пользователь
 	private $data = [];
+	// значения полей полученные с сервера
+	private $values = [];
 
 	// список ошибок
 	public $error = [];
@@ -78,34 +80,10 @@ abstract class forms {
 	}
 
 	/**
-	 * определение атрибута формы
-	 *
-	 * @param string $key
-	 * @param string $value
-	 */
-	private function set_form_attribute( $key = '', $value = '' ) {
-
-		// предотвращение случайного удаления всех полей формы
-		if ( 'content' != $key && ! empty( $key ) ) {
-
-			// если значение атрибута является массивом
-			if ( is_array( $value ) ) {
-
-				// массив преобразуется в строку со значениями, разделенными пробелами
-				$value = implode( ' ', $value );
-			}
-
-			// определение атрибута формы
-			$this->form[ $key ] = $value;
-		}
-	}
-
-
-	/**
 	 * Добавление специальных полей, если это необходимо
 	 */
 	private function add_special_fields() {
-
+//		pr( $this->form );
 		// form fields adding
 		$this->form['type']                  = 'Form';
 		$this->form['attributes']['id']      = $this->id;
@@ -178,11 +156,11 @@ abstract class forms {
 		if ( ! empty( $this->values ) ) {
 			// loop elements
 			foreach ( $data as $i => $element ) {
-				// if element has @name@ attribute and value for that name are not empty
-				if ( ! empty( $element['attributes']['name'] ) && in_array( $element['attributes']['name'], $this->values ) ) {
+				// if element value doesn't set and element has "name" attribute and value for that name are not empty
+				if ( ! isset( $element['attributes']['value'] ) && ! empty( $element['attributes']['name'] ) && in_array( $element['attributes']['name'], $this->values ) ) {
 
+					// set the value to the element
 					$data[ $i ]['attributes']['value'] = $this->values[ $element['attributes']['name'] ];
-
 				}
 
 				// if element content is not empty and it's an array
@@ -204,141 +182,30 @@ abstract class forms {
 	 */
 	protected function build( $request ) {
 
-		$values = [];
 		if ( method_exists( $this, 'set_form' ) ) {
 
-			// получение определенных пользователем полей
+			// getting form data array
 			$this->form = $this->set_form();
 
-			// добавление специальных полей
+			// adding special fields
 			$this->add_special_fields();
 
+			// preparing the data array, with the insertion of the form element into the array, because it must be part of the set
+			$this->form = Element::prepare( [ $this->form ] );
+
+			// adding special classes
+			$this->form = $this->addSpecialClasses( $this->form );
+
+			// if form have method for getting values
 			if ( method_exists( $this, 'get_values' ) ) {
 
-				// получение значений из бд
-				$values = $this->get_values( $request );
+				// getting values from DB
+				$this->values = $this->get_values( $request );
+
+				// setting values to each element
+				$this->form = $this->setValues( $this->form );
 			}
-		}
-
-		$form = $this->form;
-
-		// если поля определены
-		if ( ! empty( $form['content'] ) ) {
-
-			// осущетваляется перебор полей
-			foreach ( $form['content'] as $key => $field ) {
-
-				// если ключ не является индесом
-				if ( ! is_numeric( $key ) ) {
-
-					$field_id = $form['content'][ $key ]['attributes']['id'];
-
-					// если классы определены
-					if ( ! empty( $form['content'][ $key ]['attributes']['class'] ) ) {
-
-						// к существующим классам дописвается дополнителный - селектор для JS
-						$form['content'][ $key ]['attributes']['class'][] = 'js-form-control-' . $field_id;
-						$form['content'][ $key ]['attributes']['class'][] = $field_id;
-					}
-					else {
-
-						// определяется класс - селектор для JS
-						$form['content'][ $key ]['attributes']['class'][] = [
-							'js-form-control-' . $field_id,
-							$field_id
-						];
-					}
-
-					// если значение не пусто
-					if ( ! empty( $values[ $key ] ) ) {
-
-						// если значение является массивом
-						if ( is_array( $values[ $key ] ) ) {
-
-							// если значение содержит данные gallery
-							if ( ! empty( $values[ $key ]['gallery'] ) ) {
-
-								// если поле не содержит ключ gallery
-								if ( empty( $form['content'][ $key ]['gallery'] ) ) {
-
-									// в поле устанавливается пустое значение для ключа gallery
-									$form['content'][ $key ]['gallery'] = [];
-								}
-
-								// производится слияние поля и значения по ключу gallery
-								$form['content'][ $key ]['gallery'] = array_merge( $form['content'][ $key ]['gallery'], $values[ $key ]['gallery'] );
-
-							}
-
-						}
-						else {
-
-							// устанавливается значение поля
-							$form['content'][ $key ] = $values[ $key ];
-						}
-					}
-
-/*
-// todo: раскомментировать позже
-
- 					// если существует массив галереи
-					if ( ! empty( $form['content'][ $key ]['gallery'] ) ) {
-
-						// установка имени поля для gallery
-						$form['content'][ $key ]['gallery']['name'] = str_replace( [ '[', ']' ], [
-							'__',
-							''
-						], $key );
-					}*/
-/*
-// todo: раскомментировать позже
-
-					// если при определении полей формы значение не было задано
-					if ( empty( $form['content'][ $key ]['value'] ) ) {
-						if ( ! empty( $values[ $key ]['value'] ) ) {
-							$value = $values[ $key ]['value'];
-						}
-						else {
-
-							// если поле числовое
-							if ( 'number' == $form['content'][ $key ]['type'] ) {
-
-								// если для поля установлено минимальное значение
-								if ( isset( $form['content'][ $key ]['attributes']['min'] ) ) {
-
-									// значение примет минимальное
-									$value = $form['content'][ $key ]['attributes']['min'];
-								}
-								else {
-
-									// значение будет равно нулю
-									$value = 0;
-								}
-							}
-							else {
-								$value = '';
-							}
-						}
-					}
-					else {
-
-						// применяется определенное пользоваетлем значение
-						$value = $form['content'][ $key ]['value'];
-					}
-
-					// значение поля определяется стандартным способом
-					$form['content'][ $key ]['value'] = $value;
-
-					// если поле является селектбоксом
-					if ( ! empty( $form['content'][ $key ]['type'] ) && 'select' == $form['content'][ $key ]['type'] ) {
-
-						// значение поля определяется для селектбокса
-						$form['content'][ $key ]['option_value'] = $value;
-					}
-
-*/
-				}
-			}
+//			pr($this->form );
 		}
 	}
 
@@ -418,17 +285,9 @@ abstract class forms {
 
 		$form['content'] = $fields;
 
-		$this->data = $form;
+		return $form;
 	}
 
-	/**
-	 * Сборка html всей формы
-	 */
-	private function get_html() {
-
-		pr( $this->form );
-		$this->data = Element::get( $this->form );
-	}
 
 	/**
 	 * Возвращение заполненных полей формы том виде, в котором их запросил пользователь
@@ -441,19 +300,22 @@ abstract class forms {
 		$this->build( $request );
 
 		switch ( $request['response'] ) {
-			case 'vue':
-				$this->get_form_vue();
-
-				return $this->data;
+			case 'json':
+				$this->data = wp_json_encode( $this->form );
 				break;
+//			case 'vue':
+//				$this->data = $this->get_form_vue();
+//
+//				break;
 			case 'html':
-				$this->get_html();
+				$this->data = Element::get( $this->form );
 
-				return $this->data;
 				break;
+			default:
+				$this->data = $this->form;
 		}
 
-		return $this->form;
+		return $this->data;
 	}
 }
 
