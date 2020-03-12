@@ -142,6 +142,61 @@ abstract class forms {
 		];
 	}
 
+	protected function addSpecialClasses( $data ) {
+		foreach ( $data as $i => $element ) {
+			if ( ! empty( $field_id = $element['attributes']['id'] ) ) {
+				if ( ! empty( $element['attributes']['class'] ) ) {
+					$data[ $i ]['attributes']['class']   = explode( ' ', $data[ $i ]['attributes']['class'] );
+					$data[ $i ]['attributes']['class'][] = 'js-form-control-' . $field_id;
+					$data[ $i ]['attributes']['class'][] = $field_id;
+					$data[ $i ]['attributes']['class']   = join( ' ', $data[ $i ]['attributes']['class'] );
+				}
+				else {
+					$data[ $i ]['attributes']['class'] = 'js-form-control-' . $field_id;
+				}
+			}
+
+			// if element content is not empty and it's an array
+			if ( ! empty( $data[ $i ]['content'] ) && is_array( $data[ $i ]['content'] ) ) {
+				// go deeper to element content
+				$data[ $i ]['content'] = self::addSpecialClasses( $data[ $i ]['content'] );
+			}
+		}
+
+		return $data;
+	}
+
+
+	/**
+	 * Insert values to elements
+	 *
+	 * @param array $data
+	 *
+	 * @return array
+	 */
+	protected function setValues( array $data ) {
+		if ( ! empty( $this->values ) ) {
+			// loop elements
+			foreach ( $data as $i => $element ) {
+				// if element has @name@ attribute and value for that name are not empty
+				if ( ! empty( $element['attributes']['name'] ) && in_array( $element['attributes']['name'], $this->values ) ) {
+
+					$data[ $i ]['attributes']['value'] = $this->values[ $element['attributes']['name'] ];
+
+				}
+
+				// if element content is not empty and it's an array
+				if ( ! empty( $data[ $i ]['content'] ) && is_array( $data[ $i ]['content'] ) ) {
+					// go deeper to element content
+					$data[ $i ]['content'] = self::setValues( $data[ $i ]['content'] );
+				}
+			}
+		}
+
+		return $data;
+	}
+
+
 	/**
 	 * Сборка формы: значения добавляются в массив данных полей
 	 *
