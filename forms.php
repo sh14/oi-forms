@@ -86,7 +86,7 @@ abstract class forms {
 	private function set_form_attribute( $key = '', $value = '' ) {
 
 		// предотвращение случайного удаления всех полей формы
-		if ( 'fields' != $key && ! empty( $key ) ) {
+		if ( 'content' != $key && ! empty( $key ) ) {
 
 			// если значение атрибута является массивом
 			if ( is_array( $value ) ) {
@@ -100,39 +100,46 @@ abstract class forms {
 		}
 	}
 
-	/**
-	 * Установка значения указанного поля
-	 *
-	 * @param $key
-	 * @param $value
-	 */
-	private function set_form_field( $key, $value ) {
-		$this->form['fields'][ $key ] = $value;
-	}
 
 	/**
 	 * Добавление специальных полей, если это необходимо
 	 */
 	private function add_special_fields() {
 
-		// определение id формы
-		$this->set_form_attribute( 'id', $this->id );
+		// form fields adding
+		$this->form['type']                  = 'Form';
+		$this->form['attributes']['id']      = $this->id;
+		$this->form['attributes']['class'][] = 'form';
+		$this->form['attributes']['class'][] = 'js-oi-forms';
+		$this->form['attributes']['method']  = ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method;
 
 		// добавление поля action, чтобы по нему дергать wp-ajax
-		$this->set_form_field( 'action', [
-			'type'  => 'hidden',
-			'value' => $this->action,
-		] );
+		$this->form['content'][] = [
+			'type'       => 'hidden',
+			'attributes' => [
+				'name'  => 'action',
+				'value' => $this->action,
+			],
+		];
+
 
 		// добавление поля request, чтобы при отправке формы происходило ее сохранение
-		$this->set_form_field( 'request', [
-			'type'  => 'hidden',
-			'value' => 'update',
-		] );
-		$this->set_form_field( 'form_id', [
-			'type'  => 'hidden',
-			'value' => str_replace( '-', '/', $this->id ),
-		] );
+		$this->form['content'][] = [
+			'type'       => 'hidden',
+			'attributes' => [
+				'name'  => 'request',
+				'value' => 'update',
+			],
+		];
+
+		// adding form class name equal form id
+		$this->form['content'][] = [
+			'type'       => 'hidden',
+			'attributes' => [
+				'name'  => 'form_id',
+				'value' => str_replace( '-', '/', $this->id ),
+			],
+		];
 	}
 
 	/**
@@ -161,48 +168,30 @@ abstract class forms {
 		$form = $this->form;
 
 		// если поля определены
-		if ( ! empty( $form['fields'] ) ) {
+		if ( ! empty( $form['content'] ) ) {
 
 			// осущетваляется перебор полей
-			foreach ( $form['fields'] as $key => $field ) {
+			foreach ( $form['content'] as $key => $field ) {
 
 				// если ключ не является индесом
 				if ( ! is_numeric( $key ) ) {
 
-					// имя поля определяется в соответствии с ключом
-					$form['fields'][ $key ]['name'] = $key;
-
-					// удаление квадратных скобок из имени поля
-					$field_id = str_replace( [ '[', ']' ], [ '-', '' ], $key );
-
-					// если получившееся имя уже присутствует в списке id'ов
-					if ( in_array( $field_id, array_keys( $this->ids ) ) ) {
-
-						// количество одинаковых id'ов увеличивается на 1
-						$this->ids[ $field_id ] ++;
-
-						// к id дописывается порядковый номер
-						$field_id .= '-' . $this->ids[ $field_id ];
-					}
-					else {
-
-						// определяется кол-во элементов с указанным id
-						$this->ids[ $field_id ] = 1;
-					}
-
-					// полю присваеватся уникальный id
-					$form['fields'][ $key ]['id'] = $field_id;
+					$field_id = $form['content'][ $key ]['attributes']['id'];
 
 					// если классы определены
-					if ( ! empty( $form['fields'][ $key ]['class'] ) ) {
+					if ( ! empty( $form['content'][ $key ]['attributes']['class'] ) ) {
 
 						// к существующим классам дописвается дополнителный - селектор для JS
-						$form['fields'][ $key ]['class'] .= ' js-form-control-' . $field_id . ' ' . $field_id;
+						$form['content'][ $key ]['attributes']['class'][] = 'js-form-control-' . $field_id;
+						$form['content'][ $key ]['attributes']['class'][] = $field_id;
 					}
 					else {
 
 						// определяется класс - селектор для JS
-						$form['fields'][ $key ]['class'] = ' js-form-control-' . $field_id . ' ' . $field_id;
+						$form['content'][ $key ]['attributes']['class'][] = [
+							'js-form-control-' . $field_id,
+							$field_id
+						];
 					}
 
 					// если значение не пусто
@@ -215,14 +204,14 @@ abstract class forms {
 							if ( ! empty( $values[ $key ]['gallery'] ) ) {
 
 								// если поле не содержит ключ gallery
-								if ( empty( $form['fields'][ $key ]['gallery'] ) ) {
+								if ( empty( $form['content'][ $key ]['gallery'] ) ) {
 
 									// в поле устанавливается пустое значение для ключа gallery
-									$form['fields'][ $key ]['gallery'] = [];
+									$form['content'][ $key ]['gallery'] = [];
 								}
 
 								// производится слияние поля и значения по ключу gallery
-								$form['fields'][ $key ]['gallery'] = array_merge( $form['fields'][ $key ]['gallery'], $values[ $key ]['gallery'] );
+								$form['content'][ $key ]['gallery'] = array_merge( $form['content'][ $key ]['gallery'], $values[ $key ]['gallery'] );
 
 							}
 
@@ -230,35 +219,40 @@ abstract class forms {
 						else {
 
 							// устанавливается значение поля
-							$form['fields'][ $key ] = $values[ $key ];
+							$form['content'][ $key ] = $values[ $key ];
 						}
 					}
 
-					// если существует массив галереи
-					if ( ! empty( $form['fields'][ $key ]['gallery'] ) ) {
+/*
+// todo: раскомментировать позже
+
+ 					// если существует массив галереи
+					if ( ! empty( $form['content'][ $key ]['gallery'] ) ) {
 
 						// установка имени поля для gallery
-						$form['fields'][ $key ]['gallery']['name'] = str_replace( [ '[', ']' ], [
+						$form['content'][ $key ]['gallery']['name'] = str_replace( [ '[', ']' ], [
 							'__',
 							''
 						], $key );
-					}
+					}*/
+/*
+// todo: раскомментировать позже
 
 					// если при определении полей формы значение не было задано
-					if ( empty( $form['fields'][ $key ]['value'] ) ) {
+					if ( empty( $form['content'][ $key ]['value'] ) ) {
 						if ( ! empty( $values[ $key ]['value'] ) ) {
 							$value = $values[ $key ]['value'];
 						}
 						else {
 
 							// если поле числовое
-							if ( 'number' == $form['fields'][ $key ]['type'] ) {
+							if ( 'number' == $form['content'][ $key ]['type'] ) {
 
 								// если для поля установлено минимальное значение
-								if ( isset( $form['fields'][ $key ]['attributes']['min'] ) ) {
+								if ( isset( $form['content'][ $key ]['attributes']['min'] ) ) {
 
 									// значение примет минимальное
-									$value = $form['fields'][ $key ]['attributes']['min'];
+									$value = $form['content'][ $key ]['attributes']['min'];
 								}
 								else {
 
@@ -274,21 +268,20 @@ abstract class forms {
 					else {
 
 						// применяется определенное пользоваетлем значение
-						$value = $form['fields'][ $key ]['value'];
+						$value = $form['content'][ $key ]['value'];
 					}
 
 					// значение поля определяется стандартным способом
-					$form['fields'][ $key ]['value'] = $value;
+					$form['content'][ $key ]['value'] = $value;
 
 					// если поле является селектбоксом
-					if ( ! empty( $form['fields'][ $key ]['type'] ) && 'select' == $form['fields'][ $key ]['type'] ) {
+					if ( ! empty( $form['content'][ $key ]['type'] ) && 'select' == $form['content'][ $key ]['type'] ) {
 
 						// значение поля определяется для селектбокса
-						$form['fields'][ $key ]['option_value'] = $value;
+						$form['content'][ $key ]['option_value'] = $value;
 					}
 
-					// установка значения поля
-					$this->set_form_field( $key, $form['fields'][ $key ] );
+*/
 				}
 			}
 		}
@@ -302,7 +295,7 @@ abstract class forms {
 	private function get_form_vue() {
 
 		$form   = $this->form;
-		$fields = array_values( $form['fields'] );
+		$fields = array_values( $form['content'] );
 
 		foreach ( $fields as $i => $field ) {
 
@@ -368,7 +361,7 @@ abstract class forms {
 			}
 		}
 
-		$form['fields'] = $fields;
+		$form['content'] = $fields;
 
 		$this->data = $form;
 	}
@@ -378,14 +371,8 @@ abstract class forms {
 	 */
 	private function get_html() {
 
-		$form                          = $this->form;
-		$form['attributes']['class'][] = 'form';
-		$form['attributes']['class'][] = 'js-oi-forms';
-		$form['attributes']['method']  = ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method;
-		$form['attributes']['id']      = $this->id;
-
-		pr( $form['fields'] );
-		$this->data = Element::get( $form['fields'] );
+		pr( $this->form );
+		$this->data = Element::get( $this->form );
 	}
 
 	/**
