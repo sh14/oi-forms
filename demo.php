@@ -8,8 +8,12 @@ namespace Elements;
 function __( $text, $domain ) {
 	return $text;
 }
-
-require 'elements/Element.php';
+function pr($d){
+	echo '<pre>';
+	print_r($d);
+	echo '</pre>';
+}
+require 'includes/Element.php';
 
 $form = [
 	[
@@ -56,7 +60,6 @@ $form = [
 						'content'    => 'News',
 						'attributes' => [
 							'value' => 3,
-							'selected' => true,
 						],
 					],
 					[
@@ -64,6 +67,7 @@ $form = [
 						'content'    => 'Interview',
 						'attributes' => [
 							'value' => 7,
+							'selected' => true,
 						],
 					],
 				],
