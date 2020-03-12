@@ -106,23 +106,22 @@ class Element {
 	/**
 	 * Обработка атрибутов тега
 	 *
-	 * @param array  $element
+	 * @param array  $elementAttributes
 	 * @param array  $attributesList
 	 * @param string $prefix
 	 *
 	 * @return array - список строк вида 'ключ="значение"'
 	 */
-	private static function processAttributes( array $element, $attributesList = [], $prefix = '' ) {
+	private static function processAttributes( array $elementAttributes, $attributesList = [], $prefix = '' ) {
 
 		// если указан префикс, атрибут составной
 		$keyPrefix = ! empty( $prefix ) ? $prefix . '-' : '';
 
-		if ( ! empty( $element['attributes'] ) ) {
 
 			$attributes = self::attributes();
 
 			// перебор пользовательских атрибутов
-			foreach ( $element['attributes'] as $key => $value ) {
+			foreach ( $elementAttributes as $key => $value ) {
 				$key = strtolower( $key );
 
 				// if element has default attributes
@@ -215,29 +214,29 @@ class Element {
 						if ( true == $attributes[ $key ]['type'] || ! empty( $value ) ) {
 
 							// добавляется название атрибута
-							$attributesList[] = $key;
+							$attributesList[$key] = $key;
 						}
 						break;
 					case 'String':
 
 						// добавляется название атрибута с текстовым значением
-						$attributesList[] = $keyPrefix . $key . '="' . htmlspecialchars( $value ) . '"';
+						$attributesList[ $keyPrefix . $key ] = htmlspecialchars( $value );
 						break;
 					case 'Number':
 
 						// добавляется название атрибута с числовым значением
-						$attributesList[] = $key . '="' . floatval( $value ) . '"';
+						$attributesList[ $key ] = floatval( $value );
 						break;
 					case 'Array':
 
 						// добавляется название атрибута с текстовым значением
-						$attributesList[] = $key . '="' . htmlspecialchars( $value ) . '"';
+						$attributesList[ $key ] = htmlspecialchars( $value );
 						break;
 				}
 
-				// if element has "name" attribute and donn't has "id"
-				if ( 'name' == $key && empty( $element['attributes']['id'] ) ) {
-					$id = $element['attributes']['name'];
+				// if it's not included attribute and element has "name" attribute and donn't has "id"
+				if (empty($prefix) &&'name' == $key && empty( $elementAttributes['id'] ) ) {
+					$id = $elementAttributes['name'];
 					$id = str_replace( '[]', '!', $id );
 					if ( ! isset( self::$ids[ $id ] ) ) {
 						self::$ids[ $id ] = 0;
@@ -251,11 +250,11 @@ class Element {
 						self::$id .= '-' . self::$ids[ $id ];
 					}
 
-					$attributesList[] = 'id="' . self::$id . '"';
+					$attributesList['id'] = self::$id;
 				}
 
 			}
-		}
+
 
 		return $attributesList;
 	}
@@ -343,6 +342,21 @@ class Element {
 	}
 
 	/**
+	 * Combining attributes to string for adding into a tag
+	 *
+	 * @param $attributes
+	 *
+	 * @return string
+	 */
+	public static function stringifyAttributes( $attributes ) {
+		foreach ( $attributes as $key => $value ) {
+			$attributes[ $key ] = $key . '=' . '"' . $value . '"';
+		}
+
+		return join( ' ', $attributes );
+	}
+
+	/**
 	 * Converts an array describing an element to HTML code
 	 *
 	 * @param array $element - an array describing an element
@@ -387,7 +401,7 @@ class Element {
 			// set type as attribute
 			$element['attributes']['type'] = $element['type'];
 			// set correct element type
-			$element['type']               = 'input';
+			$element['type'] = 'input';
 		}
 		// if user doesn't set type for input
 		if ( 'input' == $element['type'] && empty( $element['attributes']['type'] ) ) {
@@ -399,7 +413,10 @@ class Element {
 		$html[] = $element['type'];
 		// if attributes has been set
 		if ( ! empty( $element['attributes'] ) ) {
-			$html[] = implode( ' ', self::processAttributes( $element ) );
+			$attributes = self::processAttributes( $element['attributes'] );
+			pr($attributes);
+			$attributes = self::stringifyAttributes( $attributes );
+			$html[]     = $attributes;
 		}
 
 		// join strings to body of an element
