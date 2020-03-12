@@ -137,13 +137,13 @@ class Element {
 	 *
 	 * @return array - список строк вида 'ключ="значение"'
 	 */
-	private static function processAttributes( array $elementAttributes, $attributesList = [], $prefix = '' ) {
+	private static function prepareAttributes( array $elementAttributes, $attributesList = [], $prefix = '' ) {
 
 		// если указан префикс, атрибут составной
 		$keyPrefix = ! empty( $prefix ) ? $prefix . '-' : '';
 
-
-			$attributes = self::attributes();
+		// get attributes options
+		$attributes = self::attributes();
 
 			// перебор пользовательских атрибутов
 			foreach ( $elementAttributes as $key => $value ) {
@@ -177,13 +177,13 @@ class Element {
 						// если разделителей больше одного, определяется первый элемент и убирается из общего списка
 						$delimiter = sizeof( $delimiters ) > 1 ? array_shift( $delimiters ) : $delimiters[0];
 
-						// массив преобразуется в строку, разделенную указанным разделителем
-						$value = implode( $delimiter, self::processAttributeValues( $value, $delimiters ) );
-					}
-					else {
+					// массив преобразуется в строку, разделенную указанным разделителем
+					$value = implode( $delimiter, self::prepareAttributeValues( $value, $delimiters ) );
+				}
+				else {
 
-						// метод перебирает вложенный список
-						$attributesList = self::processAttributes( $value, $attributesList, $keyPrefix . $key );
+					// метод перебирает вложенный список
+					$attributesList = self::prepareAttributes( $value, $attributesList, $keyPrefix . $key );
 
 						// осуществляется переход к следующей итерации
 						continue;
@@ -295,7 +295,7 @@ class Element {
 	 *
 	 * @return array - список строк значений, сформированных для указанного атрибута
 	 */
-	private static function processAttributeValues( array $attributeValues, $delimiter = ' ', $values = [], $prefix = '' ) {
+	private static function prepareAttributeValues( array $attributeValues, $delimiter = ' ', $values = [], $prefix = '' ) {
 
 //		$keyPrefix = '';
 
@@ -352,7 +352,7 @@ class Element {
 			if ( is_array( $value ) ) {
 
 				// вызывается функция с параметрами
-				$values = self::processAttributeValues( $value, $delimiter, $values, $keyPrefix );
+				$values = self::prepareAttributeValues( $value, $delimiter, $values, $keyPrefix );
 
 				// осуществляется переход к следующей итерации
 				continue;
