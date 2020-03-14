@@ -15,8 +15,6 @@ abstract class forms {
 	private $method = 'post';
 	// id формы
 	private $id = '';
-	// cписок id элементов с значением равным кол-ву равноназванных элементов
-	private $ids = [];
 	// сформированный массив формы со значениями
 	private $form = [];
 	// отрендеренная форма в том виде, в котором запросил пользователь
@@ -115,7 +113,7 @@ abstract class forms {
 			'type'       => 'hidden',
 			'attributes' => [
 				'name'  => 'form_id',
-				'value' => str_replace( '-', '/', $this->id ),
+				'value' => $this->id,
 			],
 		];
 	}
@@ -292,7 +290,9 @@ abstract class forms {
 	/**
 	 * Возвращение заполненных полей формы том виде, в котором их запросил пользователь
 	 *
-	 * @return array
+	 * @param $request
+	 *
+	 * @return array|false|string
 	 */
 	public function get( $request ) {
 
@@ -303,10 +303,10 @@ abstract class forms {
 			case 'json':
 				$this->data = wp_json_encode( $this->form );
 				break;
-//			case 'vue':
-//				$this->data = $this->get_form_vue();
-//
-//				break;
+			case 'vue':
+				$this->data = $this->get_form_vue();
+
+				break;
 			case 'html':
 				$this->data = Element::get( $this->form );
 

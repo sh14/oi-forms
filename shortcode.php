@@ -53,6 +53,7 @@ add_shortcode( 'form', __NAMESPACE__ . '\shortcode' );
  */
 function update_forms() {
 	$data = [];
+
 	if ( empty( $_POST['action'] ) && empty( $_GET['action'] ) ) {
 		return false;
 	}
