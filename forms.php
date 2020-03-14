@@ -82,7 +82,7 @@ abstract class forms {
 	/**
 	 * Добавление специальных полей, если это необходимо
 	 */
-	private function add_special_fields() {
+	private function addSpecialFields() {
 //		pr( $this->form );
 		// form fields adding
 		$this->form['type']                  = 'Form';
@@ -188,7 +188,7 @@ abstract class forms {
 			$this->form = $this->set_form();
 
 			// adding special fields
-			$this->add_special_fields();
+			$this->addSpecialFields();
 
 			// preparing the data array, with the insertion of the form element into the array, because it must be part of the set
 			$this->form = Element::prepare( [ $this->form ] );
