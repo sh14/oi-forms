@@ -28,7 +28,7 @@ function is_json( $data ) {
 
 require 'includes/templating.php';
 //require 'includes/FormBuilder.php';
-require 'forms.php';
+require 'includes/forms.php';
 require 'includes/Element.php';
 require 'shortcode.php';
 require 'ajax.php';
