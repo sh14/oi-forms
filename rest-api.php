@@ -42,6 +42,9 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\rest_api_endpoints' );
  */
 function forms_rest_api( WP_REST_Request $request ) {
 
+	// set flag of transfer method
+	$data['transfer_method'] = 'api';
+
 	return get_forms( $request->get_params() );
 }
 

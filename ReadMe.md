@@ -95,3 +95,14 @@ $form = [
 print_r( Element::get( $form ) );
 
 ```
+
+### Redirect
+
+You can check for transfer method and if it not an `ajax` or `api` the the data has been sent via usual method with page reloading
+```php
+if(empty($_POST['transfer_method'])){
+    wp_redirect('?post_id' . $data['ID'] );
+}else{
+    return $data;
+}
+```

@@ -24,7 +24,10 @@ function forms_ajax() {
 
 		// если данные получены
 		if ( ! empty( $data ) ) {
-//			wp_send_json_success( $data );
+
+			// set flag of transfer method
+			$data['transfer_method'] = 'ajax';
+
 			// выполняется обработка данных
 			$result = get_forms( $data );
 
