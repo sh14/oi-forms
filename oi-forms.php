@@ -112,20 +112,6 @@ function get_post_publication_date( $post_id, $status ) {
 }
 
 /**
- * Удаляет из текста лишнее, кроме разрешенных тегов
- *
- * @param string $text
- * @param string $allowabletags
- *
- * @return string
- */
-function simplify_text( $text, $allowabletags = '' ) {
-	$text = stripslashes( trim( strip_tags( $text, $allowabletags ) ) );
-	$text = str_replace( '--', '-', $text );
-
-	return $text;
-}
-/**
  * Функция определения роли текущего пользователя
  *
  * @param $role
@@ -197,40 +183,6 @@ function current_user_can_edit( $post_id ) {
 	return false;
 }
 
-/**
- * Обработка списка тегов, с возможностью сохранения для указанного поста
- *
- * @param     $tags
- * @param int $post_id
- *
- * @return string
- */
-function parse_tags( $tags, $post_id = 0 ) {
-	if ( ! empty( $tags ) ) {
-		if ( ! is_array( $tags ) ) {
-			$tags = mb_strtolower( $tags );
-			preg_match_all( '/([\p{Cyrillic}a-z0-9_]+)/u', $tags, $tags_new );
-			$tags_new = $tags_new[1];
-		}
-		else {
-			$tags_new = $tags;
-		}
-
-		if ( ! empty( $tags_new ) ) {
-			$tags_new = array_unique( $tags_new );
-			if ( ! empty( $post_id ) ) {
-				wp_set_post_tags( $post_id, $tags_new, false );
-				$tags_new = join( ',', $tags_new );
-
-				return $tags_new;
-			}
-
-			$tags = '#' . join( ' #', $tags_new );
-		}
-	}
-
-	return $tags;
-}
 
 /**
  * Подключение всех файлов из указанной папки
