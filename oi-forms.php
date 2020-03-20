@@ -37,7 +37,6 @@ require 'rest-api.php';
 // require forms from active theme
 require_all_in( WP_CONTENT_DIR . '/themes/' . get_stylesheet() . '/' . get_plugin_name() );
 
-
 /**
  * Функция обработки запроса на получение данных формы
  *
@@ -82,6 +81,155 @@ function get_forms( $data ) {
 			__( 'Форма "' . $class . '" не найдена.', __NAMESPACE__ ),
 		],
 	];
+}
+
+/**
+ * Определение даты, которая должна быть указана у публикации
+ * дата перестает меняться после того, как статья публикуется, если при этом не устанавливается дата позже текущей
+ *
+ * @param $post_id
+ * @param $status
+ *
+ * @return int|string
+ */
+function get_post_publication_date( $post_id, $status ) {
+	$post         = get_post( $post_id, ARRAY_A );
+	$current_time = current_time( 'mysql' );
+
+	// если пост публикуется и при этом дата меньше или равна текущей
+	if ( 'publish' != $post['post_status'] && 'publish' == $status && strtotime( $post['post_date'] ) <= strtotime( $current_time ) ) {
+		$date = $current_time;
+	}
+	else {
+
+		// дата отложенной публикации
+		$date = $post['post_date'];
+	}
+
+
+	return $date;
+
+}
+
+/**
+ * Удаляет из текста лишнее, кроме разрешенных тегов
+ *
+ * @param string $text
+ * @param string $allowabletags
+ *
+ * @return string
+ */
+function simplify_text( $text, $allowabletags = '' ) {
+	$text = stripslashes( trim( strip_tags( $text, $allowabletags ) ) );
+	$text = str_replace( '--', '-', $text );
+
+	return $text;
+}
+/**
+ * Функция определения роли текущего пользователя
+ *
+ * @param $role
+ *
+ * @return bool
+ */
+function isRole( $role ) {
+	switch ( $role ) {
+
+		// администратор всего мультисайта
+		case 'superadmin':
+			if ( current_user_can( 'create_sites' ) ) {
+				return true;
+			}
+			break;
+
+		// администратор на обычном сайте
+		case 'admin':
+			if ( current_user_can( 'activate_plugins' ) ) {
+				return true;
+			}
+			break;
+		case 'editor':
+			if ( current_user_can( 'edit_private_posts' ) ) {
+				return true;
+			}
+			break;
+		case 'author':
+			if ( current_user_can( 'edit_published_posts' ) ) {
+				return true;
+			}
+			break;
+		case 'contributor':
+			if ( current_user_can( 'edit_posts' ) ) {
+				return true;
+			}
+			break;
+		case 'subscriber':
+			if ( current_user_can( 'read' ) ) {
+				return true;
+			}
+			break;
+	}
+
+	return false;
+}
+
+/**
+ * Определение - может ли текущий пользователь редактировать указанный пост
+ *
+ * @param $post_id
+ *
+ * @return bool
+ */
+function current_user_can_edit( $post_id ) {
+	if ( isRole( 'admin' ) ) {
+		return true;
+	}
+
+	// получение данных поста из бд
+	$post = get_post( $post_id, ARRAY_A );
+
+	// если текущий пользователь является автором поста или редактором, и при этом пост не опубликован
+	if ( ( get_current_user_id() == $post['post_author'] || isRole( 'editor' ) ) && 'publish' != $post['post_status'] ) {
+
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Обработка списка тегов, с возможностью сохранения для указанного поста
+ *
+ * @param     $tags
+ * @param int $post_id
+ *
+ * @return string
+ */
+function parse_tags( $tags, $post_id = 0 ) {
+	if ( ! empty( $tags ) ) {
+		if ( ! is_array( $tags ) ) {
+			$tags = mb_strtolower( $tags );
+			preg_match_all( '/([\p{Cyrillic}a-z0-9_]+)/u', $tags, $tags_new );
+			$tags_new = $tags_new[1];
+		}
+		else {
+			$tags_new = $tags;
+		}
+
+		if ( ! empty( $tags_new ) ) {
+			$tags_new = array_unique( $tags_new );
+			if ( ! empty( $post_id ) ) {
+				wp_set_post_tags( $post_id, $tags_new, false );
+				$tags_new = join( ',', $tags_new );
+
+				return $tags_new;
+			}
+
+			$tags = '#' . join( ' #', $tags_new );
+		}
+	}
+
+	return $tags;
 }
 
 /**
