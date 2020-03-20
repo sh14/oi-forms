@@ -441,7 +441,7 @@ class Element {
 				foreach ( $element[ $type ] as $key => $value ) {
 
 					// если значение не является массивом
-					if ( is_string( $value ) ) {
+					if ( is_string( $key ) ) {
 
 						// в html заменяются все вхождения указанного ключа
 						$html = str_replace( "%{$key}%", $value, $html );
@@ -495,14 +495,6 @@ class Element {
 
 		if ( ! empty( $element['content'] ) ) {
 			$element['content'] = self::prepare( $element['content'] );
-		}
-
-
-		// if the HTML pattern exists
-		if ( ! empty( $element['html'] ) ) {
-			if ( ! empty( self::$id ) ) {
-				$element['vars']['id'] = self::$id;
-			}
 		}
 
 		return $element;
