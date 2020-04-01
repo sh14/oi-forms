@@ -15,6 +15,8 @@
 namespace forms;
 
 use WP_REST_Server;
+
+
 function pr($d){
 	echo '<pre>';
 	print_r($d);
@@ -26,6 +28,7 @@ function is_json( $data ) {
 	return json_last_error() == JSON_ERROR_NONE;
 }
 
+require 'init.php';
 require 'includes/templating.php';
 //require 'includes/FormBuilder.php';
 require 'includes/forms.php';
@@ -243,7 +246,8 @@ function require_all_in( $dir ) {
  *
  * @return array
  */
-/*function forms_endpoints( $endpoints ) {
+/*
+function forms_endpoints( $endpoints ) {
 	// эндпоинт для работы с
 	return array_merge( $endpoints, [
 		// Форма публикации
