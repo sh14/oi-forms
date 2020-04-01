@@ -257,7 +257,20 @@ function forms_endpoints( $endpoints ) {
 	] );
 }
 
-add_filter( 'forms_endpoints_filter', __NAMESPACE__ . '\\' . 'forms_endpoints', 10, 1 );*/
+add_filter( 'forms_endpoints_filter', __NAMESPACE__ . '\\' . 'forms_endpoints', 10, 1 );
+*/
+
+function register_scripts() {
+
+	wp_enqueue_script(
+		'oijq',
+		get_site_url().'/oijq/oijq.js',
+		[],
+		Init::$data['version'],
+		true
+	);
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__.'\register_scripts' );
 
 
 // eof
