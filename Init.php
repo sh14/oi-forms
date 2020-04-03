@@ -56,6 +56,9 @@ class Init {
 		] );
 		$data = self::$data;
 		self::$data = array_merge( $data, $file_data );
+
+		// current plugin url directory
+		self::$data['theme_path'] = WP_CONTENT_DIR . '/themes/' . get_stylesheet() . '/' . $data['name'];
 	}
 }
 
