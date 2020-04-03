@@ -16,11 +16,11 @@ abstract class forms {
 	// id формы
 	private $id = '';
 	// сформированный массив формы со значениями
-	private $form = [];
+	protected $form = [];
 	// отрендеренная форма в том виде, в котором запросил пользователь
-	private $data = [];
+	protected $data = [];
 	// значения полей полученные с сервера
-	private $values = [];
+	protected $values = [];
 
 	// список ошибок
 	public $error = [];
