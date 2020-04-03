@@ -22,6 +22,7 @@ function pr($d){
 	print_r($d);
 	echo '</pre>';
 }
+
 function is_json( $data ) {
 	json_decode( $data, true );
 
@@ -36,7 +37,9 @@ require 'includes/Element.php';
 require 'shortcode.php';
 require 'ajax.php';
 require 'rest-api.php';
-//echo get_stylesheet().'/'.get_plugin_name();die;
+
+// require forms from current plugin
+require_all_in( get_plugin_path() . '/forms/' );
 // require forms from active theme
 require_all_in( WP_CONTENT_DIR . '/themes/' . get_stylesheet() . '/' . get_plugin_name() );
 
@@ -264,13 +267,14 @@ function register_scripts() {
 
 	wp_enqueue_script(
 		'oijq',
-		get_site_url().'/oijq/oijq.js',
+		get_site_url() . '/oijq/oijq.js',
 		[],
 		Init::$data['version'],
 		true
 	);
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__.'\register_scripts' );
+
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\register_scripts' );
 
 
 // eof
