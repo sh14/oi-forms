@@ -17,9 +17,15 @@ namespace forms;
 use WP_REST_Server;
 
 
-function pr($d){
+function pr( $d ) {
+
+	ob_start();
+	print_r( $d );
+	$out = ob_get_contents();
+	ob_clean();
+	$out = htmlspecialchars($out);
 	echo '<pre>';
-	print_r($d);
+	echo $out;
 	echo '</pre>';
 }
 
