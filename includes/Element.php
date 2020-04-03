@@ -400,7 +400,7 @@ class Element {
 		$content = ! empty( $element['content'] ) ? self::get( $element['content'] ) : '';
 
 		// если элемент парный
-		if ( ! in_array( $element['type'], ['input',] ) ) {
+		if ( ! in_array( $element['type'], [ 'input', ] ) ) {
 
 			// формирование парного элемента
 			$html = "<{$html}>{$content}</{$element['type']}>";
@@ -545,7 +545,7 @@ class Element {
 		static::init();
 
 		// if data is not an array, it means that $data is a content like a string, label, for example
-		if ( ! is_array( $data ) ) {
+		if ( ! is_array( $data ) || empty( $data ) ) {
 			return $data;
 		}
 
