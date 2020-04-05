@@ -17,13 +17,19 @@ namespace forms;
 use WP_REST_Server;
 
 
-function pr( $d ) {
+function pr( $line,$d, $specialchars = false ) {
 
 	ob_start();
 	print_r( $d );
 	$out = ob_get_contents();
 	ob_clean();
-	$out = htmlspecialchars($out);
+	if ( empty( $specialchars ) ) {
+		$out = ( $out );
+	}
+	else {
+		$out = htmlspecialchars( $out );
+	}
+	echo 'Line: '.$line.'<br>';
 	echo '<pre>';
 	echo $out;
 	echo '</pre>';
