@@ -11,12 +11,14 @@ use function \oifrontend\image_uploader\uploadable_image;
 use function forms\get_post_publication_date;
 use function forms\isRole;
 use function forms\current_user_can_edit;
+use function forms\pr;
 
 class Post extends forms {
 
 	private $categories;
 	private $user_id = 0;
 	private $post_id = 0;
+	private $allowedContentTags = '<strong><b><i><quote><figure><img>';
 
 	/**
 	 * Инициализация
@@ -125,120 +127,143 @@ class Post extends forms {
 		];
 
 		// post content field template
-		$contentSwitcher = [
+		$templateBlockType = [
 			'type'       => 'select',
 			'attributes' => [
-				'name' => 'block_type',
+//				'name' => 'block_type[]',
 			],
-			'vars'       => [
-//				'label' => __( 'Category', __NAMESPACE__ ),
-//				'hint'  => __( '', __NAMESPACE__ ),
-			],
-			'content'    => [
-				[
-					'type'       => 'option',
-					'attributes' => [
-						'value' => 'p',
-					],
-					'content'    => 'p',
-				],
-				[
-					'type'       => 'option',
-					'attributes' => [
-						'value' => 'h2',
-					],
-					'content'    => 'h2',
-				],
-				[
-					'type'       => 'option',
-					'attributes' => [
-						'value' => 'h3',
-					],
-					'content'    => 'h3',
-				],
-				[
-					'type'       => 'option',
-					'attributes' => [
-						'value' => 'h4',
-					],
-					'content'    => 'h4',
-				],
-			],
+			'content'    => [],
 		];
 
 		// post content field template
-		$content = [
+		$templateBlockContent = [
 			'type'       => 'textarea',
-			'multiply'   => true,
 			'attributes' => [
-				'name' => 'post_content',
+//				'name' => 'block_content[]',
 			],
-			'vars'       => [
-//				'label' => __( 'Content', __NAMESPACE__ ),
+		];
+		// post content field template
+		$templateBlockOptions = [
+			'type'       => 'hidden',
+			'attributes' => [
+//				'name' => 'block_options[]',
 			],
 		];
 
 		$fieldsSet = [];
+		if ( ! empty( $blocks = $this->values['post_content'] ) ) {
+			preg_match_all( '/<!-- wp:(.*?) -->(.*?)<!-- \/wp:(.*?) -->/si', $blocks, $matches );
+			// default block types order
+			$options = [
+				'paragraph' => '',
+				'heading'   => '',
+				'heading 3' => '',
+				'heading 4' => '',
+				'image'     => '',
+			];
+			// adding options to switcher
+			foreach ( $matches[0] as $i => $value ) {
+				// block options
+				$block = explode( ' ', $matches[1][ $i ], 2 );
+				$key   = $block[0];
 
-		if ( ! empty( $this->values['post_content'] ) ) {
-			preg_match_all( '/<!-- wp:(.*?) -->(.*?)<!-- \/wp:(.*?) -->/si', $this->values['post_content'], $contentData );
+				if ( ! empty( $block[1] ) ) {
+
+					$block[1] = (array) json_decode( $block[1] );
+					if ( ! empty( $block[1]['level'] ) ) {
+						$key .= ' ' . $block[1]['level'];
+					}
+					$options[ $key ] = $block[1];
+				}
+				else {
+					$options[ $key ] = '';
+				}
+			}
+//			pr( __LINE__, $options );
+
+			// loop for Gutenberg options
+			foreach ( $options as $key => $value ) {
+				$templateBlockType['content'][] = [
+					'type'       => 'option',
+					'attributes' => [
+						'value' => $key,
+						'data'  => [
+							'options' => ! empty( $value ) ? urlencode( json_encode( $value ) ) : '',
+						],
+					],
+					'content'    => $key,
+				];
+			}
+
 			// loop for Gutenberg blocks
-			foreach ( $contentData[2] as $i => $value ) {
+			foreach ( $matches[2] as $i => $value ) {
+
+				// check user data
+				$value = $this->simplify( $value, $this->allowedContentTags );
+
+				// tag options
+				$block = explode( ' ', $matches[1][ $i ], 2 );
 
 				// actual tag of current block
-				$actualTag = '';
-				// tag options
-				$tag = explode( ' ', $contentData[1][ $i ], 2 );
+				$actualTag = $block[0];
+
+				$blockOptions = $templateBlockOptions;
 
 				// in case of block is...
-				switch ( $tag[0] ) {
-					case 'heading':
-						$actualTag .= 'h';
-						// set level of heading
-						if ( ! empty( $tag[1] ) ) {
-							$tag[1]    = (array) json_decode( $tag[1] );
-							$actualTag .= $tag[1]['level'];
-						}
-						// or set default
-						else {
-							$actualTag .= 2;
-						}
-						break;
-					case 'paragraph':
-						$actualTag .= 'p';
-						break;
-					case 'image':
-						$actualTag .= 'p';
-						break;
-				}
+				if ( ! empty( $block[1] ) ) {
 
-				$contentTag = $contentSwitcher;
-				$contentTag['attributes']['name']            = 'block_type['.$i.']';
+					// set block options
+					$blockOptions['attributes']['value'] = esc_attr( $block[1] );
+
+					$block[1] = (array) json_decode( $block[1] );
+					if ( ! empty( $block[1]['level'] ) ) {
+						$actualTag .= ' ' . $block[1]['level'];
+					}
+				}
+				$blockOptions['attributes']['name'] = 'block_options[' . $i . ']';
+				$fieldsSet[]                        = $blockOptions;
+
+				$blockType                       = $templateBlockType;
+				$blockType['attributes']['name'] = 'block_type[' . $i . ']';
+
 				// set selected tag in select
-				foreach ( $contentTag['content'] as $j => $option ) {
+				foreach ( $blockType['content'] as $j => $option ) {
+
 					if ( $actualTag == $option['attributes']['value'] ) {
-						$contentTag['content'][ $j ]['attributes']['selected'] = true;
+						$blockType['content'][ $j ]['attributes']['selected'] = true;
 					}
 				}
 				$this->values['block_type'][ $i ] = $actualTag;
-				// add selectbox with list of tags and selected one
-				$fieldsSet[] = $contentTag;
+				// add selectBox with list of tags and selected one
+				$fieldsSet[] = $blockType;
 
 				// set field with block data inside
-				$contentPart            = $content;
-				$contentPart['attributes']['name']            = 'post_content['.$i.']';
-				$contentPart['content'] = trim(strip_tags( $value, '<strong>' ));
-				$fieldsSet[]            = $contentPart;
+				$blockContent = $templateBlockContent;
+				if ( 'image' == $actualTag ) {
+					$blockContent['type']                = 'hidden';
+					$blockContent['attributes']['value'] = esc_attr( $value );
+				}
+				$blockContent['attributes']['name'] = 'block_content[' . $i . ']';
+				// block output as normal HTML(image HTML for example)
+				$blockContent['content'] = ( $value );
+				$fieldsSet[]             = $blockContent;
+				$fieldsSet[]             = [
+					'type' => 'hr',
+				];
 			}
 		}
 		else {
-			$contentTag = $contentSwitcher;
-			$contentTag['attributes']['name']            = 'block_type[0]';
-			$fieldsSet[] = $contentTag;
+			$blockOptions                       = $templateBlockOptions;
+			$blockOptions['attributes']['name'] = 'block_options[0]';
+			$fieldsSet[]                        = $blockOptions;
 
-			$contentPart            = $content;
-			$contentPart['attributes']['name']            = 'post_content[0]';
-			$fieldsSet[] = $contentPart;
+			$blockType                       = $templateBlockType;
+			$blockType['attributes']['name'] = 'block_type[0]';
+			$fieldsSet[]                     = $blockType;
+
+			$blockContent                       = $templateBlockContent;
+			$blockContent['attributes']['name'] = 'block_content[0]';
+			$fieldsSet[]                        = $blockContent;
 		}
 		$fieldsSet[] = [
 			'type'    => 'legend',
@@ -332,7 +357,7 @@ class Post extends forms {
 		}
 		$this->values = $post;
 
-		\forms\pr( $post );
+//		pr( $post );
 
 		return $post;
 	}
@@ -430,14 +455,38 @@ class Post extends forms {
 			$post['post_status'] = 'pending';
 		}
 
-		$post['post_title']     = ! empty( $post['post_title'] ) ? $this->simplify( $post['post_title'] ) : 'no-name';
+		$post['post_title'] = ! empty( $post['post_title'] ) ? $this->simplify( $post['post_title'] ) : 'no-name';
+		foreach ( $post['block_content'] as $i => $value ) {
+			if ( ! empty( $post['block_content'][ $i ] ) ) {
+				$post['block_content'][ $i ] = $this->simplify( $post['block_content'][ $i ], $this->allowedContentTags );
+				$options                     = ! empty( $post['block_options'][ $i ] ) ? ' ' . $post['block_options'][ $i ] : '';
+				$optionsArray                = ! empty( $options ) ? json_decode( $options ) : [];
+				list( $tagType ) = explode( ' ', $post['block_type'][ $i ] );
+				switch ( $tagType ) {
+					case 'paragraph':
+						$tag = 'p';
+						break;
+					case 'heading':
+						$tag = 'h';
 
-		foreach ($post['post_content'] as $i=>$value){
-//			$tag =
-			$post['post_content'][$i] = $post['block_type'][$i];
+						if ( ! empty( $optionsArray['level'] ) ) {
+							$tag .= $optionsArray['level'];
+						}
+						break;
+					case 'image':
+						$tag = '';
+						break;
+				}
+				$tagStart                    = ! empty( $tag ) ? "<{$tag}>" : '';
+				$tagEnd                      = ! empty( $tag ) ? "</{$tag}>" : '';
+				$post['block_content'][ $i ] = '<!-- wp:' . $tagType . $options . ' -->' . PHP_EOL
+				                               . $tagStart . $post['block_content'][ $i ] . $tagEnd . PHP_EOL
+				                               . '<!-- /wp:' . $tagType . ' -->' . PHP_EOL
+				                               . PHP_EOL;
+			}
 		}
 
-		$post['post_content']   = ! empty( $post['post_content'] ) ? $this->simplify( $post['post_content'], '<p><strong><b><i><quote>' ) : '';
+		$post['post_content']   = join( '', $post['block_content'] );
 		$post['post_type']      = 'post';
 		$post['comment_status'] = 'open';
 		$post['post_category']  = ! empty( $post['post_category'] ) ? array_map( 'absint', explode( ',', $post['post_category'] ) ) : [];
