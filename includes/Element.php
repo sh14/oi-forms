@@ -244,8 +244,8 @@ class Element {
 					break;
 				case 'String':
 
-					// добавляется название атрибута с текстовым значением
-					$attributesList[ $keyPrefix . $key ] = htmlspecialchars( $value );
+					// text value without converting htmlspecialchars to avoid converting errors
+					$attributesList[ $keyPrefix . $key ] = ( $value );
 					break;
 				case 'Number':
 
