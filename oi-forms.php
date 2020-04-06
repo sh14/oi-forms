@@ -19,20 +19,20 @@ use WP_REST_Server;
 
 function pr( $line,$d, $specialchars = false ) {
 
+
+
 	ob_start();
+
 	print_r( $d );
 	$out = ob_get_contents();
 	ob_clean();
-	if ( empty( $specialchars ) ) {
-		$out = ( $out );
-	}
-	else {
+	if ( !empty( $specialchars ) ) {
 		$out = htmlspecialchars( $out );
 	}
-	echo 'Line: '.$line.'<br>';
 	echo '<pre>';
+	echo 'Line: '.$line.'<br>';
 	echo $out;
-	echo '</pre>';
+	echo '</pre><hr>';
 }
 
 function is_json( $data ) {
