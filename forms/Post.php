@@ -31,14 +31,14 @@ class Post extends forms {
 		if ( ! is_user_logged_in() || ! isRole( 'contributor' ) ) {
 			$this->error = __( 'Необходимо аторизоваться.', __NAMESPACE__ );
 		}
+		else {
 
+			$this->user_id = ! empty( $_GET['user_id'] ) ? $_GET['user_id'] : 0;
+			$this->post_id = ! empty( $_GET['post_id'] ) ? $_GET['post_id'] : 0;
 
-		$this->user_id = ! empty( $_GET['user_id'] ) ? $_GET['user_id'] : 0;
-		$this->post_id = ! empty( $_GET['post_id'] ) ? $_GET['post_id'] : 0;
-
-		// getting values from DB
-		$this->values = $this->get_values( $request );
-
+			// getting values from DB
+			$this->values = $this->get_values( $request );
+		}
 	}
 
 	/**
@@ -151,17 +151,20 @@ class Post extends forms {
 		];
 
 		$fieldsSet = [];
+		// default block types order
+		$options = [
+			'paragraph' => '',
+			'heading'   => '',
+			'heading 3' => '{"level":3}',
+			'heading 4' => '{"level":4}',
+//			'image'     => '',
+		];
+
+
 		if ( ! empty( $blocks = $this->values['post_content'] ) ) {
 			preg_match_all( '/<!-- wp:(.*?) -->(.*?)<!-- \/wp:(.*?) -->/si', $blocks, $matches );
-			// default block types order
-			$options = [
-				'paragraph' => '',
-				'heading'   => '',
-				'heading 3' => '',
-				'heading 4' => '',
-				'image'     => '',
-			];
-			// adding options to switcher
+
+			// adding Gutenberg block options from content to $options and correct them values
 			foreach ( $matches[0] as $i => $value ) {
 				// block options
 				$block = explode( ' ', $matches[1][ $i ], 2 );
@@ -173,28 +176,31 @@ class Post extends forms {
 					if ( ! empty( $block[1]['level'] ) ) {
 						$key .= ' ' . $block[1]['level'];
 					}
-					$options[ $key ] = $block[1];
+					if ( ! empty( $block[1] ) ) {
+						$options[ $key ] = $block[1];
+					}
 				}
 				else {
 					$options[ $key ] = '';
 				}
 			}
-//			pr( __LINE__, $options );
+		}
 
-			// loop for Gutenberg options
-			foreach ( $options as $key => $value ) {
-				$templateBlockType['content'][] = [
-					'type'       => 'option',
-					'attributes' => [
-						'value' => $key,
-						'data'  => [
-							'options' => ! empty( $value ) ? urlencode( json_encode( $value ) ) : '',
-						],
+		// loop for Gutenberg options
+		foreach ( $options as $key => $value ) {
+			$templateBlockType['content'][] = [
+				'type'       => 'option',
+				'attributes' => [
+					'value' => $key,
+					'data'  => [
+						'options' => ! empty( $value ) ? esc_attr( json_encode( $value ) ) : '',
 					],
-					'content'    => $key,
-				];
-			}
+				],
+				'content'    => $key,
+			];
+		}
 
+		if ( ! empty( $matches[2] ) ) {
 			// loop for Gutenberg blocks
 			foreach ( $matches[2] as $i => $value ) {
 
@@ -367,25 +373,24 @@ class Post extends forms {
 	 *
 	 * @param     $tags
 	 *
-	 * @return string
+	 * @return array
 	 */
-	private function parseTags( $tags ) {
-		if ( ! empty( $tags ) ) {
-			if ( ! is_array( $tags ) ) {
-				$tags = mb_strtolower( $tags );
-				preg_match_all( '/([\p{Cyrillic}a-z0-9_]+)/u', $tags, $tags_new );
-				$tags_new = $tags_new[1];
-			}
-			else {
-				$tags_new = $tags;
-			}
-
-			if ( ! empty( $tags_new ) ) {
-				$tags_new = array_unique( $tags_new );
-			}
+	private function parseTags( $tags = [] ) {
+		if ( empty( $tags ) ) {
+			return [];
 		}
 
-		return $tags_new;
+		if ( ! is_array( $tags ) ) {
+			$tags = mb_strtolower( $tags );
+			preg_match_all( '/([\p{Cyrillic}a-z0-9_]+)/u', $tags, $tags_new );
+			$tags = $tags_new[1];
+		}
+
+		if ( ! empty( $tags ) ) {
+			$tags = array_unique( $tags );
+		}
+
+		return $tags;
 	}
 
 	/**
@@ -459,8 +464,9 @@ class Post extends forms {
 		foreach ( $post['block_content'] as $i => $value ) {
 			if ( ! empty( $post['block_content'][ $i ] ) ) {
 				$post['block_content'][ $i ] = $this->simplify( $post['block_content'][ $i ], $this->allowedContentTags );
-				$options                     = ! empty( $post['block_options'][ $i ] ) ? ' ' . $post['block_options'][ $i ] : '';
-				$optionsArray                = ! empty( $options ) ? json_decode( $options ) : [];
+				$options                     = ! empty( $post['block_options'][ $i ] ) ? ' ' . stripslashes( $post['block_options'][ $i ] ) : '';
+				$optionsArray                = ! empty( $options ) ? (array) json_decode( trim( $options ) ) : [];
+//				pr( __LINE__, $optionsArray );
 				list( $tagType ) = explode( ' ', $post['block_type'][ $i ] );
 				switch ( $tagType ) {
 					case 'paragraph':
@@ -471,6 +477,9 @@ class Post extends forms {
 
 						if ( ! empty( $optionsArray['level'] ) ) {
 							$tag .= $optionsArray['level'];
+						}
+						else {
+							$tag .= '2';
 						}
 						break;
 					case 'image':
@@ -483,9 +492,11 @@ class Post extends forms {
 				                               . $tagStart . $post['block_content'][ $i ] . $tagEnd . PHP_EOL
 				                               . '<!-- /wp:' . $tagType . ' -->' . PHP_EOL
 				                               . PHP_EOL;
+//				pr( __LINE__, $post['block_content'][ $i ], true );
 			}
 		}
 
+//		die;
 		$post['post_content']   = join( '', $post['block_content'] );
 		$post['post_type']      = 'post';
 		$post['comment_status'] = 'open';
