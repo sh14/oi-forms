@@ -319,8 +319,18 @@ abstract class forms {
 	 */
 	public function get( $request ) {
 
+		// return data if it has errors
+		if(!empty($this->data['errors'])){
+			return $this->data;
+		}
 		// построение формы с обязательными полями и значениями
 		$this->build( $request );
+
+		// return data if it has errors
+		if(!empty($this->data['errors'])){
+			return $this->data;
+		}
+
 
 		switch ( $request['response'] ) {
 			case 'json':
