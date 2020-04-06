@@ -334,7 +334,7 @@ abstract class forms {
 
 		switch ( $request['response'] ) {
 			case 'json':
-				$this->data = wp_json_encode( $this->form );
+				$this->data = wp_json_encode( $this->form, JSON_UNESCAPED_UNICODE );
 				break;
 			case 'vue':
 				$this->data = $this->get_form_vue();
