@@ -17,7 +17,7 @@ namespace forms;
 use WP_REST_Server;
 
 
-function pr( $line,$d, $specialchars = false ) {
+function pr( $line,$d=[], $specialchars = false ) {
 
 
 
