@@ -277,9 +277,9 @@ add_filter( 'forms_endpoints_filter', __NAMESPACE__ . '\\' . 'forms_endpoints', 
 
 function register_scripts() {
 
-	wp_enqueue_script(
+	wp_register_script(
 		'oijq',
-		get_site_url() . '/oijq/oijq.js',
+		get_site_url() . '/oijq/js/oijq.js',
 		[],
 		Init::$data['version'],
 		true

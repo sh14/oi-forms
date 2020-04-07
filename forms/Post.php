@@ -7,11 +7,13 @@
 namespace myTheme;
 
 use forms\forms;
+use forms\Init;
 use function \oifrontend\image_uploader\uploadable_image;
 use function forms\get_post_publication_date;
 use function forms\isRole;
 use function forms\current_user_can_edit;
 use function forms\pr;
+use function forms\get_plugin_url;
 
 class Post extends forms {
 
@@ -39,12 +41,15 @@ class Post extends forms {
 			// getting values from DB
 			$this->values = $this->get_values( $request );
 		}
+		wp_enqueue_script('oijq');
+		wp_enqueue_script('oi-form-post',get_plugin_url().'/js/Post.js',['oijq'],Init::$data['version'],true);
 	}
 
 	/**
 	 * Определение всех полей формы без значений
 	 */
 	public function set_form() {
+
 
 		// get all categories even empty
 		$this->categories = get_categories(
