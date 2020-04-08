@@ -8,6 +8,7 @@ namespace myTheme;
 
 use forms\forms;
 use forms\Init;
+use forms\Gutenberg;
 use function \oifrontend\image_uploader\uploadable_image;
 use function forms\get_post_publication_date;
 use function forms\isRole;
@@ -41,8 +42,8 @@ class Post extends forms {
 			// getting values from DB
 			$this->values = $this->get_values( $request );
 		}
-		wp_enqueue_script('oijq');
-		wp_enqueue_script('oi-form-post',get_plugin_url().'/js/Post.js',['oijq'],Init::$data['version'],true);
+		wp_enqueue_script( 'oijq' );
+		wp_enqueue_script( 'oi-form-post', get_plugin_url() . '/js/Post.js', [ 'oijq' ], Init::$data['version'], true );
 	}
 
 	/**
@@ -131,163 +132,9 @@ class Post extends forms {
 			'content'    => $categoryOptions,
 		];
 
-		// post content field template
-		$templateBlockType = [
-			'type'       => 'select',
-			'attributes' => [
-//				'name' => 'block_type[]',
-			],
-			'content'    => [],
-		];
+		// add Gutenberg compatible fields for post content
+		$fields[] = Gutenberg::get( $this->values, $this->allowedContentTags );
 
-		// post content field template
-		$templateBlockContent = [
-			'type'       => 'textarea',
-			'attributes' => [
-//				'name' => 'block_content[]',
-			],
-		];
-		// post content field template
-		$templateBlockOptions = [
-			'type'       => 'hidden',
-			'attributes' => [
-//				'name' => 'block_options[]',
-			],
-		];
-
-		$fieldsSet = [];
-		// default block types order
-		$options = [
-			'paragraph' => '',
-			'heading'   => '',
-			'heading 3' => '{"level":3}',
-			'heading 4' => '{"level":4}',
-//			'image'     => '',
-		];
-
-
-		if ( ! empty( $blocks = $this->values['post_content'] ) ) {
-			preg_match_all( '/<!-- wp:(.*?) -->(.*?)<!-- \/wp:(.*?) -->/si', $blocks, $matches );
-
-			// adding Gutenberg block options from content to $options and correct them values
-			foreach ( $matches[0] as $i => $value ) {
-				// block options
-				$block = explode( ' ', $matches[1][ $i ], 2 );
-				$key   = $block[0];
-
-				if ( ! empty( $block[1] ) ) {
-
-					$block[1] = (array) json_decode( $block[1] );
-					if ( ! empty( $block[1]['level'] ) ) {
-						$key .= ' ' . $block[1]['level'];
-					}
-					if ( ! empty( $block[1] ) ) {
-						$options[ $key ] = $block[1];
-					}
-				}
-				else {
-					$options[ $key ] = '';
-				}
-			}
-		}
-
-		// loop for Gutenberg options
-		foreach ( $options as $key => $value ) {
-			$templateBlockType['content'][] = [
-				'type'       => 'option',
-				'attributes' => [
-					'value' => $key,
-					'data'  => [
-						'options' => ! empty( $value ) ? esc_attr( json_encode( $value ) ) : '',
-					],
-				],
-				'content'    => $key,
-			];
-		}
-
-		if ( ! empty( $matches[2] ) ) {
-			// loop for Gutenberg blocks
-			foreach ( $matches[2] as $i => $value ) {
-
-				// check user data
-				$value = $this->simplify( $value, $this->allowedContentTags );
-
-				// tag options
-				$block = explode( ' ', $matches[1][ $i ], 2 );
-
-				// actual tag of current block
-				$actualTag = $block[0];
-
-				$blockOptions = $templateBlockOptions;
-
-				// in case of block is...
-				if ( ! empty( $block[1] ) ) {
-
-					// set block options
-					$blockOptions['attributes']['value'] = esc_attr( $block[1] );
-
-					$block[1] = (array) json_decode( $block[1] );
-					if ( ! empty( $block[1]['level'] ) ) {
-						$actualTag .= ' ' . $block[1]['level'];
-					}
-				}
-				$blockOptions['attributes']['name'] = 'block_options[' . $i . ']';
-				$fieldsSet[]                        = $blockOptions;
-
-				$blockType                       = $templateBlockType;
-				$blockType['attributes']['name'] = 'block_type[' . $i . ']';
-
-				// set selected tag in select
-				foreach ( $blockType['content'] as $j => $option ) {
-
-					if ( $actualTag == $option['attributes']['value'] ) {
-						$blockType['content'][ $j ]['attributes']['selected'] = true;
-					}
-				}
-				$this->values['block_type'][ $i ] = $actualTag;
-				// add selectBox with list of tags and selected one
-				$fieldsSet[] = $blockType;
-
-				// set field with block data inside
-				$blockContent = $templateBlockContent;
-				if ( 'image' == $actualTag ) {
-					$blockContent['type']                = 'hidden';
-					$blockContent['attributes']['value'] = esc_attr( $value );
-				}
-				$blockContent['attributes']['name'] = 'block_content[' . $i . ']';
-				// block output as normal HTML(image HTML for example)
-				$blockContent['content'] = ( $value );
-				$fieldsSet[]             = $blockContent;
-				$fieldsSet[]             = [
-					'type' => 'hr',
-				];
-			}
-		}
-		else {
-			$blockOptions                       = $templateBlockOptions;
-			$blockOptions['attributes']['name'] = 'block_options[0]';
-			$fieldsSet[]                        = $blockOptions;
-
-			$blockType                       = $templateBlockType;
-			$blockType['attributes']['name'] = 'block_type[0]';
-			$fieldsSet[]                     = $blockType;
-
-			$blockContent                       = $templateBlockContent;
-			$blockContent['attributes']['name'] = 'block_content[0]';
-			$fieldsSet[]                        = $blockContent;
-		}
-		$fieldsSet[] = [
-			'type'    => 'legend',
-			'content' => 'Content',
-		];
-		$fields[]    = [
-			'type'       => 'fieldset',
-			'attributes' => [
-				'class' => 'form__group form__group-set',
-			],
-			'content'    => $fieldsSet,
-			'html'       => '%%',
-		];
 		// post title field
 		$fields[] = [
 			'type'       => 'text',

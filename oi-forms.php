@@ -46,6 +46,7 @@ require 'includes/templating.php';
 //require 'includes/FormBuilder.php';
 require 'includes/forms.php';
 require 'includes/Element.php';
+require 'includes/Gutenberg.php';
 require 'shortcode.php';
 require 'ajax.php';
 require 'rest-api.php';
