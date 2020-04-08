@@ -17,8 +17,7 @@ namespace forms;
 use WP_REST_Server;
 
 
-function pr( $line,$d=[], $specialchars = false ) {
-
+function pr( $line, $d = [], $specialchars = false ) {
 
 
 	ob_start();
@@ -26,11 +25,11 @@ function pr( $line,$d=[], $specialchars = false ) {
 	print_r( $d );
 	$out = ob_get_contents();
 	ob_clean();
-	if ( !empty( $specialchars ) ) {
+	if ( ! empty( $specialchars ) ) {
 		$out = htmlspecialchars( $out );
 	}
 	echo '<pre>';
-	echo 'Line: '.$line.'<br>';
+	echo 'Line: ' . $line . '<br>';
 	echo $out;
 	echo '</pre><hr>';
 }
@@ -101,6 +100,69 @@ function get_forms( $data ) {
 		],
 	];
 }
+
+/**
+ * Function that creates the classes chain in BEM style
+ *
+ * @param string $classTrail
+ * @param bool   $toAttribute
+ * @param bool   $isArray
+ *
+ * @return array|string
+ */
+function bem( $classTrail = '', $toAttribute = false, $isArray = true ) {
+	if ( empty( $classTrail ) ) {
+		return '';
+	}
+
+	$classTrail = array_values( array_filter( explode( '.', $classTrail ) ) );
+
+	$mixins  = [];
+	$classes = [];
+	$block   = '';
+	$count   = sizeof( $classTrail );
+	foreach ( $classTrail as $i => $item ) {
+		if ( 0 === $i ) {
+			$block = $classTrail[ $i ];
+
+			if ( 1 == $count ) {
+				$classes[] = $block;
+			}
+		}
+		else {
+
+			if ( 0 === strpos( $classTrail[ $i ], '_' ) ) {
+				$mixins[] = $classTrail[ $i ];
+				if ( 2 == $count ) {
+					$classes[] = $block;
+				}
+			}
+			else {
+				$classes[] = $block . '__' . $classTrail[ $i ];
+			}
+		}
+	}
+
+	foreach ( $classes as $i => $class ) {
+		foreach ( $mixins as $j => $mixin ) {
+			$classes[] = $classes[ $i ] . $mixin;
+		}
+	}
+
+	// if $isArray is true
+	if(!empty($isArray)){
+		// return classes as array
+		return $classes;
+	}
+
+	$classes = join( ' ', $classes );
+	if ( ! empty( $toAttribute ) ) {
+		$classes = ' class="' . $classes . '" ';
+	}
+
+	return $classes;
+}
+
 
 /**
  * Определение даты, которая должна быть указана у публикации
