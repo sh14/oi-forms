@@ -21,7 +21,8 @@ class Post extends forms {
 	private $categories;
 	private $user_id = 0;
 	private $post_id = 0;
-	private $allowedContentTags = '<strong><b><i><quote><figure><img>';
+	// tags that will not be removed in the values
+	private $allowedContentTags = [ 'strong', 'b', 'i', 'quote', 'figure', 'img' ];
 
 	/**
 	 * Инициализация
@@ -41,9 +42,15 @@ class Post extends forms {
 
 			// getting values from DB
 			$this->values = $this->get_values( $request );
+
+			// convert list of tags to PHP 5 style
+			$this->allowedContentTags = join( '', array_map( function ( $tag ) {
+				return "<{$tag}>";
+			}, $this->allowedContentTags ) );
+
+			wp_enqueue_script( 'oijq' );
+			wp_enqueue_script( 'oi-form-post', get_plugin_url() . '/js/Post.js', [ 'oijq' ], Init::$data['version'], true );
 		}
-		wp_enqueue_script( 'oijq' );
-		wp_enqueue_script( 'oi-form-post', get_plugin_url() . '/js/Post.js', [ 'oijq' ], Init::$data['version'], true );
 	}
 
 	/**
