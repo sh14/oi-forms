@@ -21,7 +21,7 @@ class Gutenberg {
 		$templateBlockType = [
 			'type'       => 'select',
 			'attributes' => [
-//				'name' => 'block_type[]',
+				'name' => 'block_type[]',
 				'data' => [
 					'name' => 'block_type',
 				],
@@ -34,7 +34,7 @@ class Gutenberg {
 		$templateBlockContent = [
 			'type'       => 'textarea',
 			'attributes' => [
-//				'name' => 'block_content[]',
+				'name' => 'block_content[]',
 				'data' => [
 					'name' => 'block_content',
 				],
@@ -46,7 +46,7 @@ class Gutenberg {
 		$templateBlockOptions = [
 			'type'       => 'hidden',
 			'attributes' => [
-//				'name' => 'block_options[]',
+				'name' => 'block_options[]',
 				'data' => [
 					'name' => 'block_options',
 				],
@@ -154,7 +154,7 @@ class Gutenberg {
 		$blocks[] = [
 			'type'       => 'script',
 			'attributes' => [
-				'id'   => 'wp-block',
+				'id'   => bem('template.wp-block',false,false),
 				'type' => 'text/ejs',
 				'class'=>bem('js.template-wp-block'),
 			],
@@ -162,7 +162,7 @@ class Gutenberg {
 				[
 					'type'       => 'div',
 					'attributes' => [
-						'class' => bem('form.group'),
+						'class' => bem('form.group js.wp-block'),
 					],
 					'content'    => array_values( $templates ),
 				],
@@ -222,7 +222,7 @@ class Gutenberg {
 				$blocks[] = [
 					'type'       => 'div',
 					'attributes' => [
-						'class' => bem('form.group'),
+						'class' => bem('form.group js.wp-block'),
 					],
 					'content'    => [
 						$blockOptions,
