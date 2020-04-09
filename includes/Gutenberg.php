@@ -7,7 +7,6 @@
 
 namespace forms;
 
-
 class Gutenberg {
 	public static $options = [
 		'paragraph' => '',
@@ -26,6 +25,7 @@ class Gutenberg {
 				'data' => [
 					'name' => 'block_type',
 				],
+				'class'=>bem('form.control._select js.block-type'),
 			],
 			'content'    => [],
 		];
@@ -38,8 +38,10 @@ class Gutenberg {
 				'data' => [
 					'name' => 'block_content',
 				],
+				'class'=>bem('form.control'),
 			],
 		];
+
 		// post content field template
 		$templateBlockOptions = [
 			'type'       => 'hidden',
@@ -115,15 +117,35 @@ class Gutenberg {
 
 	public static function get( $values, $allowedContentTags ) {
 
+		$plus     = [
+			'type'       => 'div',
+			'attributes' => [
+				'class' => bem( 'plus' ),
+			],
+			'content'    => [
+				[
+					'type'       => 'div',
+					'attributes' => [
+						'class' => bem( 'plus.button js.plus-wp-block' ),
+					],
+					'content'    => '+',
+				],
+			],
+		];
 		$blocks   = [];
 		$blocks[] = [
 			'type'    => 'legend',
+			'attributes' => [
+				'class' => bem( 'form.legend' ),
+			],
 			'content' => 'Content',
 		];
+		$blocks[] = $plus;
 		$matches  = [];
 		if ( ! empty( $values['post_content'] ) ) {
 			preg_match_all( '/<!-- wp:(.*?) -->(.*?)<!-- \/wp:(.*?) -->/si', $values['post_content'], $matches );
 		}
+
 
 		// get templates
 		$templates = self::getTemplates( $matches );
@@ -134,12 +156,13 @@ class Gutenberg {
 			'attributes' => [
 				'id'   => 'wp-block',
 				'type' => 'text/ejs',
+				'class'=>bem('js.template-wp-block'),
 			],
 			'content'    => [
 				[
 					'type'       => 'div',
 					'attributes' => [
-						'class' => 'wp-block',
+						'class' => bem('form.group'),
 					],
 					'content'    => array_values( $templates ),
 				],
@@ -199,12 +222,13 @@ class Gutenberg {
 				$blocks[] = [
 					'type'       => 'div',
 					'attributes' => [
-						'class' => 'wp-block',
+						'class' => bem('form.group'),
 					],
 					'content'    => [
 						$blockOptions,
 						$blockType,
 						$blockContent,
+						$plus,
 					],
 				];
 			}
@@ -216,7 +240,7 @@ class Gutenberg {
 			$blocks[]                           = [
 				'type'       => 'div',
 				'attributes' => [
-					'class' => 'wp-block',
+					'class' => bem('form.group'),
 				],
 				'content'    => [
 					$blockOptions,
@@ -229,7 +253,7 @@ class Gutenberg {
 		$fieldsSet = [
 			'type'       => 'fieldset',
 			'attributes' => [
-				'class' => 'form__group form__group-set',
+				'class' => bem('form.fieldset'),
 			],
 			'content'    => $blocks,
 			'html'       => '%%',

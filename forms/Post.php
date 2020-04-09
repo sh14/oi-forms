@@ -6,6 +6,7 @@
 
 namespace myTheme;
 
+use function forms\bem;
 use forms\forms;
 use forms\Init;
 use forms\Gutenberg;
@@ -120,6 +121,7 @@ class Post extends forms {
 			'type'       => 'text',
 			'attributes' => [
 				'name' => 'post_title',
+				'class'=>bem('form.control._text'),
 			],
 			'vars'       => [
 				'label' => __( 'Title', __NAMESPACE__ ),
@@ -131,6 +133,7 @@ class Post extends forms {
 			'type'       => 'select',
 			'attributes' => [
 				'name' => 'post_category',
+				'class'=>bem('form.control._select'),
 			],
 			'vars'       => [
 				'label' => __( 'Category', __NAMESPACE__ ),
@@ -147,6 +150,7 @@ class Post extends forms {
 			'type'       => 'text',
 			'attributes' => [
 				'name' => 'tags_input',
+				'class'=>bem('form.control._text'),
 			],
 			'vars'       => [
 				'label' => __( 'Tags', __NAMESPACE__ ),
@@ -160,7 +164,7 @@ class Post extends forms {
 			'content'    => __( 'сохранить', __NAMESPACE__ ),
 			'attributes' => [
 				'type'  => 'submit',
-				'class' => 'form__submit pull-right button',
+				'class'=>bem('form.submit'),
 			],
 		];
 
@@ -169,12 +173,12 @@ class Post extends forms {
 			// if it is not a button
 			if ( ! in_array( $fields[ $i ]['type'], [ 'button', 'html' ] ) && ! isset( $fields[ $i ]['html'] ) ) {
 				// if we have some data in field
-				$label = ! empty( $fields[ $i ]['vars']['label'] ) ? '<label class="form__label" for="%id%">%label%</label>' : '';
-				$hint  = ! empty( $fields[ $i ]['vars']['hint'] ) ? '<div class="form__hint">%hint%</div>' : '';
+				$label = ! empty( $fields[ $i ]['vars']['label'] ) ? '<label'.bem('form.label',true).'for="%id%">%label%</label>' : '';
+				$hint  = ! empty( $fields[ $i ]['vars']['hint'] ) ? '<div'.bem('form.hint',true).'>%hint%</div>' : '';
 				// add it to HTML pattern
-				$fields[ $i ]['html'] = '<div class="form__group">'
+				$fields[ $i ]['html'] = '<div'.bem('form.group',true).'>'
 				                        . $label
-				                        . '<div class="form__input">'
+				                        . '<div'.bem('form.field',true).'>'
 				                        . '%%'
 				                        . '</div>'
 				                        . $hint

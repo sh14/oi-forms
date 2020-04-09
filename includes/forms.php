@@ -86,7 +86,7 @@ abstract class forms {
 		$this->form['type']                  = 'Form';
 		$this->form['attributes']['id']      = $this->id;
 		$this->form['attributes']['class'][] = 'form';
-		$this->form['attributes']['class'][] = 'js-oi-forms';
+//		$this->form['attributes']['class'][] = 'js-oi-forms';
 		$this->form['attributes']['method']  = ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method;
 
 		// добавление поля action, чтобы по нему дергать wp-ajax
@@ -120,7 +120,7 @@ abstract class forms {
 
 	protected function addSpecialClasses( $data ) {
 		foreach ( $data as $i => $element ) {
-			if ( ! empty( $field_id = $element['attributes']['id'] ) ) {
+/*			if ( ! empty( $field_id = $element['attributes']['id'] ) ) {
 				if ( ! empty( $element['attributes']['class'] ) ) {
 					$data[ $i ]['attributes']['class']   = explode( ' ', $data[ $i ]['attributes']['class'] );
 					$data[ $i ]['attributes']['class'][] = 'js-form-control-' . $field_id;
@@ -130,7 +130,7 @@ abstract class forms {
 				else {
 					$data[ $i ]['attributes']['class'] = 'js-form-control-' . $field_id;
 				}
-			}
+			}*/
 
 			// if element content is not empty and it's an array
 			if ( ! empty( $data[ $i ]['content'] ) && is_array( $data[ $i ]['content'] ) ) {
