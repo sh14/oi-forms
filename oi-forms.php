@@ -115,52 +115,60 @@ function bem( $classTrail = '', $toAttribute = false, $isArray = true ) {
 		return '';
 	}
 
-	$classTrail = array_values( array_filter( explode( '.', $classTrail ) ) );
+	$trails = [];
 
-	$mixins  = [];
-	$classes = [];
-	$block   = '';
-	$count   = sizeof( $classTrail );
-	foreach ( $classTrail as $i => $item ) {
-		if ( 0 === $i ) {
-			$block = $classTrail[ $i ];
+	$classTrails = array_values( array_filter( explode( ' ', $classTrail ) ) );
 
-			if ( 1 == $count ) {
-				$classes[] = $block;
-			}
-		}
-		else {
+	foreach ( $classTrails as $classTrail ) {
 
-			if ( 0 === strpos( $classTrail[ $i ], '_' ) ) {
-				$mixins[] = $classTrail[ $i ];
-				if ( 2 == $count ) {
+		$classTrail = array_values( array_filter( explode( '.', $classTrail ) ) );
+
+		$mixins  = [];
+		$classes = [];
+		$block   = '';
+		$count   = sizeof( $classTrail );
+		foreach ( $classTrail as $i => $item ) {
+			if ( 0 === $i ) {
+				$block = $classTrail[ $i ];
+
+				if ( 1 == $count ) {
 					$classes[] = $block;
 				}
 			}
 			else {
-				$classes[] = $block . '__' . $classTrail[ $i ];
+
+				if ( 0 === strpos( $classTrail[ $i ], '_' ) ) {
+					$mixins[] = $classTrail[ $i ];
+					if ( 2 == $count ) {
+						$classes[] = $block;
+					}
+				}
+				else {
+					$classes[] = $block . '__' . $classTrail[ $i ];
+				}
 			}
 		}
-	}
 
-	foreach ( $classes as $i => $class ) {
-		foreach ( $mixins as $j => $mixin ) {
-			$classes[] = $classes[ $i ] . $mixin;
+		foreach ( $classes as $i => $class ) {
+			foreach ( $mixins as $j => $mixin ) {
+				$classes[] = $classes[ $i ] . $mixin;
+			}
 		}
+
+		$trails = array_merge( $trails, $classes );
 	}
 
-	// if $isArray is true
-	if(!empty($isArray)){
-		// return classes as array
-		return $classes;
-	}
-
-	$classes = join( ' ', $classes );
 	if ( ! empty( $toAttribute ) ) {
-		$classes = ' class="' . $classes . '" ';
+		return ' class="' . join( ' ', $trails ) . '" ';
 	}
 
-	return $classes;
+	// if $isArray is false
+	if ( empty( $isArray ) ) {
+		$trails = join( ' ', $trails );
+	}
+
+	// return classes as array
+	return $trails;
 }
 
 
