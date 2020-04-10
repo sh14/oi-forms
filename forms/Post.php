@@ -49,8 +49,7 @@ class Post extends forms {
 				return "<{$tag}>";
 			}, $this->allowedContentTags ) );
 
-			wp_enqueue_script( 'oijq' );
-			wp_enqueue_script( 'oi-form-post', get_plugin_url() . '/js/Post.js', [ 'oijq' ], Init::$data['version'], true );
+			wp_enqueue_script( 'oi-form-post', get_plugin_url() . 'assets/js/Post.js', [ 'oijq' ], Init::$data['version'], true );
 		}
 	}
 
