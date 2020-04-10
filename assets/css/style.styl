@@ -4,63 +4,40 @@ color__border = #dcdcdc
   &__group
     position relative
 
-.remove-block
-  position: absolute;
-  left: 0.2em;
-  bottom: -.8em;
+.dynamic
+  &__group
+    position relative
 
-  &__button
-    width 2em
-    height 2em
-    line-height 1
-    font-size 1em
-    text-align center
-    padding 0
-    align-items center
-    justify-content center
-    margin: auto;
-    display: block
-    text-decoration none
-    background-color: red !important;
-    color: #fff;
-    border-width: 2px;
-    border-color: color__border
-    border-style: solid;
-    box-sizing: border-box;
-    font-family: monospace;
-    font-weight: 300;
+  &__add
+    bottom: -0.8em;
+    position: absolute;
+    left: 0;
+    width: 100%;
 
-    &:hover, &:active, &:focus
+    &-button
+      border-radius 50%
+      width 2em
+      height 2em
+      line-height 1
+      font-size 1em
+      text-align center
+      padding 0
+      align-items center
+      justify-content center
+      margin: auto;
+      display: block
       text-decoration none
+      background-color: #fff !important;
+      color: #000;
+      border-width: 2px;
+      border-color: color__border
+      border-style: solid;
+      box-sizing: border-box;
+      font-family: monospace;
+      font-weight: 300
+      position: relative;
+      z-index: 2;
 
-.add-block
-  bottom: -0.8em;
-  position: absolute;
-  left: 0;
-  width: 100%;
-
-  &__button
-    border-radius 50%
-    width 2em
-    height 2em
-    line-height 1
-    font-size 1em
-    text-align center
-    padding 0
-    align-items center
-    justify-content center
-    margin: auto;
-    display: block
-    text-decoration none
-    background-color: #fff !important;
-    color: #000;
-    border-width: 2px;
-    border-color: color__border
-    border-style: solid;
-    box-sizing: border-box;
-    font-family: monospace;
-    font-weight: 300
-
-    &:hover, &:active, &:focus
-      text-decoration none
+      &:hover, &:active, &:focus
+        text-decoration none
 

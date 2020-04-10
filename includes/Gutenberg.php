@@ -25,7 +25,7 @@ class Gutenberg {
 				'data'  => [
 					'name' => 'block_type',
 				],
-				'class' => bem( 'form.control._select js.block-type' ),
+				'class' => bem( 'dynamic.control._select js.block-type' ),
 			],
 			'content'    => [],
 		];
@@ -38,7 +38,7 @@ class Gutenberg {
 				'data'  => [
 					'name' => 'block_content',
 				],
-				'class' => bem( 'form.control' ),
+				'class' => bem( 'dynamic.control._textarea js.block-content' ),
 			],
 		];
 
@@ -50,6 +50,7 @@ class Gutenberg {
 				'data' => [
 					'name' => 'block_options',
 				],
+				'class' => bem( 'js.block-options' ),
 			],
 		];
 
@@ -94,6 +95,15 @@ class Gutenberg {
 			];
 		}
 
+		$templateBlockType['content'][] = [
+			'type'       => 'option',
+			'attributes' => [
+				'value' => 'remove',
+				'class' => bem( 'js.remove-wp-block' ),
+			],
+			'content'    => __( 'Remove block', __NAMESPACE__ ),
+		];
+
 		return [
 			'options' => $templateBlockOptions,
 			'type'    => $templateBlockType,
@@ -110,6 +120,9 @@ class Gutenberg {
 	 * @return string
 	 */
 	private static function simplify( $text, $allowabletags = '' ) {
+		if ( empty( $text ) ) {
+			return '';
+		}
 		$text = stripslashes( trim( strip_tags( $text, $allowabletags ) ) );
 
 		return $text;
@@ -117,35 +130,37 @@ class Gutenberg {
 
 	public static function get( $values, $allowedContentTags ) {
 
-		$plus     = [
+		$addButton = [
 			'type'       => 'div',
 			'attributes' => [
-				'class' => bem( 'plus' ),
+				'class' => bem( 'dynamic.add' ),
 			],
 			'content'    => [
 				[
-					'type'       => 'div',
+					'type'       => 'button',
 					'attributes' => [
-						'class' => bem( 'plus.button js.plus-wp-block' ),
+						'type'  => 'button',
+						'class' => bem( 'dynamic.add-button js.add-wp-block' ),
 					],
 					'content'    => '+',
 				],
 			],
 		];
+
+		// set type of $blocks
 		$blocks   = [];
 		$blocks[] = [
 			'type'       => 'legend',
 			'attributes' => [
-				'class' => bem( 'form.legend' ),
+				'class' => bem( 'dynamic.legend' ),
 			],
 			'content'    => 'Content',
 		];
-		$blocks[] = $plus;
+		$blocks[] = $addButton;
 		$matches  = [];
 		if ( ! empty( $values['post_content'] ) ) {
 			preg_match_all( '/<!-- wp:(.*?) -->(.*?)<!-- \/wp:(.*?) -->/si', $values['post_content'], $matches );
 		}
-
 
 		// get templates
 		$templates = self::getTemplates( $matches );
@@ -154,9 +169,9 @@ class Gutenberg {
 		$templateBlock = [
 			'type'       => 'div',
 			'attributes' => [
-				'class' => bem( 'form.group js.wp-block' ),
+				'class' => bem( 'dynamic.group js.wp-block' ),
 			],
-			'content'    => array_merge( array_values( $templates ), [ $plus ] ),
+			'content'    => array_merge( array_values( $templates ), [ $addButton ] ),
 		];
 
 		// wp-block JS template
@@ -170,71 +185,67 @@ class Gutenberg {
 			'content'    => [ $templateBlock ],
 		];
 
-		// let's add so many blocks as values we have
-		if ( ! empty( $matches[2] ) ) {
-			// loop for Gutenberg blocks
-			foreach ( $matches[2] as $i => $value ) {
-
-				$value = self::simplify( $value, $allowedContentTags );
-
-				$blockOptions = $templates['options'];
-				$blockType    = $templates['type'];
-				$blockContent = $templates['content'];
-
-				// tag options
-				$block = explode( ' ', $matches[1][ $i ], 2 );
-
-				// actual tag of current block
-				$actualTag = $block[0];
-
-				// in case of block is...
-				if ( ! empty( $block[1] ) ) {
-
-					// set block options
-					$blockOptions['attributes']['value'] = esc_attr( $block[1] );
-
-					$block[1] = (array) json_decode( $block[1] );
-					if ( ! empty( $block[1]['level'] ) ) {
-						$actualTag .= ' ' . $block[1]['level'];
-					}
-				}
-				$blockOptions['attributes']['name'] = 'block_options[' . $i . ']';
-
-				$blockType['attributes']['name'] = 'block_type[' . $i . ']';
-
-				// set selected tag in select
-				foreach ( $blockType['content'] as $j => $option ) {
-
-					// set "selected" or not
-					if ( $actualTag == $option['attributes']['value'] ) {
-						$blockType['content'][ $j ]['attributes']['selected'] = true;
-					}
-				}
-
-				if ( 'image' == $actualTag ) {
-					$blockContent['type']                = 'hidden';
-					$blockContent['attributes']['value'] = esc_attr( $value );
-				}
-				$blockContent['attributes']['name'] = 'block_content[' . $i . ']';
-				$blockContent['content']            = $value;
-				$templateBlock['content']           = [
-					$blockOptions,
-					$blockType,
-					$blockContent,
-					$plus,
-				];
-				$blocks[]                           = $templateBlock;
-			}
+		// if we don't have any blocks
+		if ( empty( $matches[2] ) ) {
+			// let's create one paragraph with empty value
+			$matches = [
+				[ '' ],
+				[ 'paragraph' ],
+				[ '' ],
+			];
 		}
-		else {
-			$blockOptions['attributes']['name'] = 'block_options[0]';
-			$blockType['attributes']['name']    = 'block_type[0]';
-			$blockContent['attributes']['name'] = 'block_content[0]';
+
+		// loop for Gutenberg blocks
+		foreach ( $matches[2] as $i => $value ) {
+
+			$value = self::simplify( $value, $allowedContentTags );
+
+			$blockOptions = $templates['options'];
+			$blockType    = $templates['type'];
+			$blockContent = $templates['content'];
+
+			// tag options
+			$block = explode( ' ', $matches[1][ $i ], 2 );
+
+			// actual tag of current block
+			$actualTag = $block[0];
+
+			// if block has options
+			if ( ! empty( $block[1] ) ) {
+
+				// set block options to special field
+				$blockOptions['attributes']['value'] = esc_attr( $block[1] );
+
+				// convert options to an array
+				$block[1] = (array) json_decode( $block[1] );
+				if ( ! empty( $block[1]['level'] ) ) {
+					// add to tag name option part
+					$actualTag .= ' ' . $block[1]['level'];
+				}
+			}
+			$blockOptions['attributes']['name'] = 'block_options[' . $i . ']';
+			$blockType['attributes']['name']    = 'block_type[' . $i . ']';
+
+			// set selected tag in select
+			foreach ( $blockType['content'] as $j => $option ) {
+
+				// set "selected" or not
+				if ( $actualTag == $option['attributes']['value'] ) {
+					$blockType['content'][ $j ]['attributes']['selected'] = true;
+				}
+			}
+
+			if ( 'image' == $actualTag ) {
+				$blockContent['type']                = 'hidden';
+				$blockContent['attributes']['value'] = esc_attr( $value );
+			}
+			$blockContent['attributes']['name'] = 'block_content[' . $i . ']';
+			$blockContent['content']            = $value;
 			$templateBlock['content']           = [
 				$blockOptions,
 				$blockType,
 				$blockContent,
-				$plus,
+				$addButton,
 			];
 			$blocks[]                           = $templateBlock;
 		}
@@ -242,7 +253,7 @@ class Gutenberg {
 		$fieldsSet = [
 			'type'       => 'fieldset',
 			'attributes' => [
-				'class' => bem( 'form.fieldset' ),
+				'class' => bem( 'dynamic' ),
 			],
 			'content'    => $blocks,
 			'html'       => '%%',
