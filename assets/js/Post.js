@@ -11,3 +11,19 @@ on('click', '.js__add-wp-block', (event) => {
   // reindex all blocks
   indexDynamicFields('.js__wp-block')
 })
+
+// Listen for click on a plus button
+on('change', '.js__block-type', (event) => {
+  event.preventDefault()
+  const select = event.target
+  // search for root block element
+  const parent = select.closest('.js__wp-block')
+  if ('remove' === select.value) {
+    // remove selected block
+    parent.remove()
+    // reindex all blocks
+    indexDynamicFields('.js__wp-block')
+  }else{
+    parent.querySelector('.js__block-options').value = select.options[select.selectedIndex].getAttribute('data-options')
+  }
+})
