@@ -21,11 +21,11 @@ class Gutenberg {
 		$templateBlockType = [
 			'type'       => 'select',
 			'attributes' => [
-				'name' => 'block_type[]',
-				'data' => [
+				'name'  => 'block_type[]',
+				'data'  => [
 					'name' => 'block_type',
 				],
-				'class'=>bem('form.control._select js.block-type'),
+				'class' => bem( 'form.control._select js.block-type' ),
 			],
 			'content'    => [],
 		];
@@ -34,11 +34,11 @@ class Gutenberg {
 		$templateBlockContent = [
 			'type'       => 'textarea',
 			'attributes' => [
-				'name' => 'block_content[]',
-				'data' => [
+				'name'  => 'block_content[]',
+				'data'  => [
 					'name' => 'block_content',
 				],
-				'class'=>bem('form.control'),
+				'class' => bem( 'form.control' ),
 			],
 		];
 
@@ -134,11 +134,11 @@ class Gutenberg {
 		];
 		$blocks   = [];
 		$blocks[] = [
-			'type'    => 'legend',
+			'type'       => 'legend',
 			'attributes' => [
 				'class' => bem( 'form.legend' ),
 			],
-			'content' => 'Content',
+			'content'    => 'Content',
 		];
 		$blocks[] = $plus;
 		$matches  = [];
@@ -150,23 +150,24 @@ class Gutenberg {
 		// get templates
 		$templates = self::getTemplates( $matches );
 
+		// block, contains all templates
+		$templateBlock = [
+			'type'       => 'div',
+			'attributes' => [
+				'class' => bem( 'form.group js.wp-block' ),
+			],
+			'content'    => array_merge( array_values( $templates ), [ $plus ] ),
+		];
+
 		// wp-block JS template
 		$blocks[] = [
 			'type'       => 'script',
 			'attributes' => [
-				'id'   => bem('template.wp-block',false,false),
-				'type' => 'text/ejs',
-				'class'=>bem('js.template-wp-block'),
+				'id'    => bem( 'template.wp-block', false, false ),
+				'type'  => 'text/ejs',
+				'class' => bem( 'js.template-wp-block' ),
 			],
-			'content'    => [
-				[
-					'type'       => 'div',
-					'attributes' => [
-						'class' => bem('form.group js.wp-block'),
-					],
-					'content'    => array_values( $templates ),
-				],
-			],
+			'content'    => [ $templateBlock ],
 		];
 
 		// let's add so many blocks as values we have
@@ -215,45 +216,33 @@ class Gutenberg {
 					$blockContent['attributes']['value'] = esc_attr( $value );
 				}
 				$blockContent['attributes']['name'] = 'block_content[' . $i . ']';
-				// block output as normal HTML(image HTML for example)
-				$blockContent['content'] = $value;
-
-				// add block to set of blocks
-				$blocks[] = [
-					'type'       => 'div',
-					'attributes' => [
-						'class' => bem('form.group js.wp-block'),
-					],
-					'content'    => [
-						$blockOptions,
-						$blockType,
-						$blockContent,
-						$plus,
-					],
+				$blockContent['content']            = $value;
+				$templateBlock['content']           = [
+					$blockOptions,
+					$blockType,
+					$blockContent,
+					$plus,
 				];
+				$blocks[]                           = $templateBlock;
 			}
 		}
 		else {
 			$blockOptions['attributes']['name'] = 'block_options[0]';
 			$blockType['attributes']['name']    = 'block_type[0]';
 			$blockContent['attributes']['name'] = 'block_content[0]';
-			$blocks[]                           = [
-				'type'       => 'div',
-				'attributes' => [
-					'class' => bem('form.group'),
-				],
-				'content'    => [
-					$blockOptions,
-					$blockType,
-					$blockContent,
-				],
+			$templateBlock['content']           = [
+				$blockOptions,
+				$blockType,
+				$blockContent,
+				$plus,
 			];
+			$blocks[]                           = $templateBlock;
 		}
 
 		$fieldsSet = [
 			'type'       => 'fieldset',
 			'attributes' => [
-				'class' => bem('form.fieldset'),
+				'class' => bem( 'form.fieldset' ),
 			],
 			'content'    => $blocks,
 			'html'       => '%%',
