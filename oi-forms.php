@@ -348,6 +348,8 @@ add_filter( 'forms_endpoints_filter', __NAMESPACE__ . '\\' . 'forms_endpoints', 
 
 function register_scripts() {
 
+	wp_enqueue_style('oi-form-post', get_plugin_url() . 'assets/css/style.css',[],Init::$data['version']);
+
 	wp_register_script(
 		'oijq',
 		get_site_url() . '/oijq/js/oijq.js',
