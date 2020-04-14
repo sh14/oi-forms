@@ -25,7 +25,7 @@ class Gutenberg {
 				'data'  => [
 					'name' => 'block_type',
 				],
-				'class' => bem( 'dynamic.control._select js.block-type' ),
+				'class' => bem( 'dynamic.control._select.showable js.block-type' ),
 			],
 			'content'    => [],
 		];
@@ -133,7 +133,7 @@ class Gutenberg {
 		$addButton = [
 			'type'       => 'div',
 			'attributes' => [
-				'class' => bem( 'dynamic.add' ),
+				'class' => bem( 'dynamic.add.showable js.add' ),
 			],
 			'content'    => [
 				[
