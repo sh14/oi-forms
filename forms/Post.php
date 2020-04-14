@@ -11,7 +11,6 @@ use forms\forms;
 use forms\Init;
 use forms\Gutenberg;
 use function \oifrontend\image_uploader\uploadable_image;
-use function forms\get_post_publication_date;
 use function forms\isRole;
 use function forms\current_user_can_edit;
 use function forms\pr;
@@ -358,8 +357,6 @@ class Post extends forms {
 			}
 
 			$post['ID'] = $this->post_id;
-			// changing date to current if post saved as publish and not as a draft
-//			$post['post_date'] = get_post_publication_date( $this->post_id, $post['post_status'] );
 		}
 
 		// if the user doesn't have necessary role but tries to publish

@@ -171,35 +171,6 @@ function bem( $classTrail = '', $toAttribute = false, $isArray = true ) {
 	return $trails;
 }
 
-
-/**
- * Определение даты, которая должна быть указана у публикации
- * дата перестает меняться после того, как статья публикуется, если при этом не устанавливается дата позже текущей
- *
- * @param $post_id
- * @param $status
- *
- * @return int|string
- */
-function get_post_publication_date( $post_id, $status ) {
-	$post         = get_post( $post_id, ARRAY_A );
-	$current_time = current_time( 'mysql' );
-
-	// если пост публикуется и при этом дата меньше или равна текущей
-	if ( 'publish' != $post['post_status'] && 'publish' == $status && strtotime( $post['post_date'] ) <= strtotime( $current_time ) ) {
-		$date = $current_time;
-	}
-	else {
-
-		// дата отложенной публикации
-		$date = $post['post_date'];
-	}
-
-
-	return $date;
-
-}
-
 /**
  * Функция определения роли текущего пользователя
  *
@@ -348,7 +319,7 @@ add_filter( 'forms_endpoints_filter', __NAMESPACE__ . '\\' . 'forms_endpoints', 
 
 function register_scripts() {
 
-	wp_enqueue_style('oi-form-post', get_plugin_url() . 'assets/css/style.css',[],Init::$data['version']);
+	wp_enqueue_style( 'oi-form-post', get_plugin_url() . 'assets/css/style.css', [], Init::$data['version'] );
 
 	wp_register_script(
 		'oijq',
