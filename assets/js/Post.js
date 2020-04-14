@@ -1,13 +1,40 @@
-// reindex all blocks
-indexDynamicFields('.js__wp-block')
+'use strict'
+let pageLock          = null
+window.onbeforeunload = isPageLocked
 
+/**
+ * Return value of pageLock
+ *
+ * @returns {null|boolean}
+ */
+function isPageLocked () {
+  if (pageLock) return pageLock
+
+  return null
+}
+
+/**
+ *
+ * @param status
+ * @param messageSelector
+ */
+function lockPage (status) {
+  pageLock = status
+  // const element = document.querySelector(messageSelector)
+  // if (element) element.innerHTML = status ? '☒︎' : ''
+}
+
+/**
+ * Creating a new content block
+ *
+ * @param event
+ */
 function createNewBlock (event) {
   event.preventDefault()
   // search for root block element
   const parent = event.target.closest('.js__wp-block')
   const select = parent.querySelector('.js__block-type')
   const offset = parseFloat(getComputedStyle(select).height)
-  cl(offset)
   // add new block after selected block
   addBlock({
     templateId: 'template__wp-block',
@@ -18,6 +45,11 @@ function createNewBlock (event) {
   // reindex all blocks
   indexDynamicFields('.js__wp-block')
 }
+
+// reindex all blocks
+indexDynamicFields('.js__wp-block')
+
+on('change', '#myTheme-Post [value]', () => lockPage(true))
 
 // Listen for click on a plus button
 on('click', '.js__add-wp-block', (event) => {
