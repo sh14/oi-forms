@@ -1,12 +1,52 @@
-color__border = #dcdcdc
+color__border = #fff
+color__border_active = #ccc
 
 .form
   &__group
     position relative
 
 .dynamic
+  border-color: color__border_active
+  border-width: 1px 0 0 0;
+  border-style: solid;
+  padding 0
+
+  &__legend
+    margin: 0 2rem
+
   &__group
     position relative
+
+  &__control
+    border-width 1px
+    border-style solid
+    border-color color__border
+    outline: none
+
+    &:focus
+      border-color color__border_active
+
+    &_textarea
+      padding: 1em
+      height: 3.5em;
+      line-height: 1.5;
+      resize none
+      transition none
+      overflow hidden
+
+      &_active
+        border-color color__border_active
+
+  &__showable
+    position: absolute;
+    bottom: 100%;
+    opacity 0
+    z-index -1
+
+    &_active
+      opacity 1
+      z-index 1
+
 
   &__add
     bottom: -0.8em;
@@ -30,7 +70,7 @@ color__border = #dcdcdc
       background-color: #fff !important;
       color: #000;
       border-width: 2px;
-      border-color: color__border
+      border-color: color__border_active
       border-style: solid;
       box-sizing: border-box;
       font-family: monospace;
