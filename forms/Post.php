@@ -26,15 +26,15 @@ class Post extends forms {
 	private $allowedContentTags = [ 'strong', 'b', 'i', 'quote', 'figure', 'img' ];
 
 	/**
-	 * Инициализация
+	 * Initialization
 	 *
 	 * @param $request
 	 */
 	protected function init( $request ) {
 
-		// если пользователь не авторизован или не имеет достаточно прав
+		// if user is not authorized or has not enough privileges
 		if ( ! is_user_logged_in() || ! isRole( 'contributor' ) ) {
-			$this->error = __( 'Необходимо аторизоваться.', __NAMESPACE__ );
+			$this->error = __( 'You have to be authorized.', __NAMESPACE__ );
 		}
 		else {
 
@@ -54,10 +54,9 @@ class Post extends forms {
 	}
 
 	/**
-	 * Определение всех полей формы без значений
+	 * Determining of all form fields without values
 	 */
 	public function set_form() {
-
 
 		// get all categories even empty
 		$this->categories = get_categories(
@@ -67,7 +66,7 @@ class Post extends forms {
 		$fields = [];
 
 		$categoryOptions = [];
-		// формирование option для каждой рубрики
+		// making of options field of each category
 		foreach ( $this->categories as $category ) {
 			$categoryOptions[] = [
 				'type'       => 'option',
@@ -86,23 +85,19 @@ class Post extends forms {
 			],
 		];
 
+		// post thumbnail field
 		if ( function_exists( '\oifrontend\image_uploader\uploadable_image' ) ) {
 			$fields[] = [
 				'type' => 'html',
 				'html' => '<div class="form__group thumbnail js-thumbnail">'
 				          . uploadable_image( [
 						'post_id'     => $this->post_id,
-//						'user_id'     => $atts['user_id'],
-//						// условие - можно ли изменять выводимое изображение
-//						'can_edit'    => true,
-//						// путь к изображению
-//						'image'       => '',
-						// стили блока с изображением
+						// block styles
 						'styles'      => 'padding-top:100%;',
-						// ширина
+						// width
 						'width'       => 1000 * 4 / 5,
 						'height'      => 1000,
-						// максимальный размер по бóльшей стороне
+						// max width
 						'maxwidth'    => 2160,
 						'destination' => 'post_thumbnail',
 						'size'        => 'contain',
@@ -119,8 +114,8 @@ class Post extends forms {
 		$fields[] = [
 			'type'       => 'text',
 			'attributes' => [
-				'name' => 'post_title',
-				'class'=>bem('form.control._text'),
+				'name'  => 'post_title',
+				'class' => bem( 'form.control._text' ),
 			],
 			'vars'       => [
 				'label' => __( 'Title', __NAMESPACE__ ),
@@ -131,8 +126,8 @@ class Post extends forms {
 		$fields[] = [
 			'type'       => 'select',
 			'attributes' => [
-				'name' => 'post_category',
-				'class'=>bem('form.control._select'),
+				'name'  => 'post_category',
+				'class' => bem( 'form.control._select' ),
 			],
 			'vars'       => [
 				'label' => __( 'Category', __NAMESPACE__ ),
@@ -148,8 +143,8 @@ class Post extends forms {
 		$fields[] = [
 			'type'       => 'text',
 			'attributes' => [
-				'name' => 'tags_input',
-				'class'=>bem('form.control._text'),
+				'name'  => 'tags_input',
+				'class' => bem( 'form.control._text' ),
 			],
 			'vars'       => [
 				'label' => __( 'Tags', __NAMESPACE__ ),
@@ -157,13 +152,57 @@ class Post extends forms {
 			],
 		];
 
-		// добавление кнопки отправки формы
+		// if user has an author role or higher
+		if ( isRole( 'author' ) ) {
+
+			// post date field will be added
+			$fields[] = [
+				'type'       => 'datetime-local',
+				'attributes' => [
+					'name'  => 'post_date',
+					'class' => bem( 'form.control._text._date' ),
+				],
+				'vars'       => [
+					'label' => __( 'Publication date', __NAMESPACE__ ),
+				],
+			];
+		}
+
+		// post status
+		$fields[] = [
+			'type'       => 'select',
+			'attributes' => [
+				'name'  => 'post_status',
+				'class' => bem( 'form.control._select._status' ),
+			],
+			'vars'       => [
+				'label' => __( 'Status', __NAMESPACE__ ),
+			],
+			'content'    => [
+				[
+					'type'       => 'option',
+					'attributes' => [
+						'value' => 'draft',
+					],
+					'content'    => __( 'Draft', __NAMESPACE__ ),
+				],
+				[
+					'type'       => 'option',
+					'attributes' => [
+						'value' => 'publish',
+					],
+					'content'    => __( 'Publish', __NAMESPACE__ ),
+				],
+			],
+		];
+
+		// submit button
 		$fields[] = [
 			'type'       => 'button',
-			'content'    => __( 'сохранить', __NAMESPACE__ ),
+			'content'    => __( 'Submit', __NAMESPACE__ ),
 			'attributes' => [
 				'type'  => 'submit',
-				'class'=>bem('form.submit'),
+				'class' => bem( 'form.submit' ),
 			],
 		];
 
@@ -172,12 +211,12 @@ class Post extends forms {
 			// if it is not a button
 			if ( ! in_array( $fields[ $i ]['type'], [ 'button', 'html' ] ) && ! isset( $fields[ $i ]['html'] ) ) {
 				// if we have some data in field
-				$label = ! empty( $fields[ $i ]['vars']['label'] ) ? '<label'.bem('form.label',true).'for="%id%">%label%</label>' : '';
-				$hint  = ! empty( $fields[ $i ]['vars']['hint'] ) ? '<div'.bem('form.hint',true).'>%hint%</div>' : '';
+				$label = ! empty( $fields[ $i ]['vars']['label'] ) ? '<label' . bem( 'form.label', true ) . 'for="%id%">%label%</label>' : '';
+				$hint  = ! empty( $fields[ $i ]['vars']['hint'] ) ? '<div' . bem( 'form.hint', true ) . '>%hint%</div>' : '';
 				// add it to HTML pattern
-				$fields[ $i ]['html'] = '<div'.bem('form.group',true).'>'
+				$fields[ $i ]['html'] = '<div' . bem( 'form.group', true ) . '>'
 				                        . $label
-				                        . '<div'.bem('form.field',true).'>'
+				                        . '<div' . bem( 'form.field', true ) . '>'
 				                        . '%%'
 				                        . '</div>'
 				                        . $hint
@@ -197,7 +236,7 @@ class Post extends forms {
 	}
 
 	/**
-	 * получение сохраненных ранее значений
+	 * Getting of previously saved values
 	 *
 	 * @param $request
 	 *
@@ -222,6 +261,9 @@ class Post extends forms {
 			$tags = join( ', ', $tags );
 			// add list of tags to post data
 			$post['tags_input'] = $tags;
+
+			// convert date for using in datetime-local input
+			$post['post_date'] = str_replace( ' ', 'T', $post['post_date'] );
 		}
 		$this->values = $post;
 
@@ -231,7 +273,7 @@ class Post extends forms {
 	}
 
 	/**
-	 * Обработка списка тегов, с возможностью сохранения для указанного поста
+	 * Parsing of given tags with ability to save them for pointed post.
 	 *
 	 * @param     $tags
 	 *
@@ -256,7 +298,7 @@ class Post extends forms {
 	}
 
 	/**
-	 * Удаляет из текста лишнее, кроме разрешенных тегов
+	 * Removing unnecessary tags from text besides of allowed.
 	 *
 	 * @param string $text
 	 * @param string $allowabletags
@@ -270,56 +312,73 @@ class Post extends forms {
 		return $text;
 	}
 
+	/**
+	 * Updating of pointed post.
+	 *
+	 * @return array
+	 */
 	public function update() {
 
-		// пользователь не может редактировать публикацию
+		// user cant update if has not enough privileges
 		if ( ! isRole( 'contributor' ) ) {
 
-			// у пользователя не достаточно прав для редактирования
-			return array(
-				'errors' => array(
+			// set error message
+			return [
+				'errors' => [
 					401 => __( 'Если вы автор статьи, вам необходимо авторизоваться в своем аккаунте.', __NAMESPACE__ ),
-				)
-			);
+				]
+			];
 		}
 
 		$post = $_POST;
 
-		// если происходит редактирование указанного поста
+		// if pointed post is editing
 		if ( ! empty( $this->post_id ) ) {
 
-			// если у пользователя нет прав
+			// if user cant edit that post
 			if ( ! current_user_can_edit( $this->post_id ) ) {
 
-				// статья уже опубликована
+				// post is already published
 				if ( 'publish' == $post['post_status'] ) {
-					return array(
-						'errors' => array(
-							401 => __( 'Данная статья уже опубликована, ее нельзя изменить.', __NAMESPACE__ ),
-						)
-					);
+					return [
+						'errors' => [
+							401 => __( 'The post is already published it cannot be edited.', __NAMESPACE__ ),
+						]
+					];
 				}
 				else {
 
-					// просто не достаточно прав
-					return array(
-						'errors' => array(
-							401 => __( 'Для внесения изменений в публикацию необходимо аторизоваться.', __NAMESPACE__ ),
-						)
-					);
+					// just not enough privileges
+					return [
+						'errors' => [
+							401 => __( 'You have to be authorized for editing the post. ', __NAMESPACE__ ),
+						]
+					];
 				}
 			}
 
 			$post['ID'] = $this->post_id;
-			// дата публикации меняется на текущую, если пост публикуется, не сохраняется как черновик
-			$post['post_date'] = get_post_publication_date( $this->post_id, $post['post_status'] );
+			// changing date to current if post saved as publish and not as a draft
+//			$post['post_date'] = get_post_publication_date( $this->post_id, $post['post_status'] );
 		}
 
-		// если пользователь не имеет необходимой роли
+		// if the user doesn't have necessary role but tries to publish
 		if ( 'publish' == $post['post_status'] && ! isRole( 'author' ) ) {
 
-			// статус устанавливается в режим ожидания
+			// set pending status
 			$post['post_status'] = 'pending';
+			// don't use new date
+			unset( $post['post_date'] );
+		}
+		else {
+			// convert date from datetime-local input to sql format
+			$post['post_date'] = str_replace( 'T', ' ', $post['post_date'] );
+
+			// if post date erlier then now
+			if ( strtotime( $post['post_date'] ) < strtotime( current_time( 'mysql' ) ) ) {
+				// don't use new date
+				unset( $post['post_date'] );
+			}
 		}
 
 		$post['post_title'] = ! empty( $post['post_title'] ) ? $this->simplify( $post['post_title'] ) : 'no-name';
