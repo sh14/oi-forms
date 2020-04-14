@@ -87,7 +87,7 @@ abstract class forms {
 		$this->form['attributes']['id']      = $this->id;
 		$this->form['attributes']['class'][] = 'form';
 //		$this->form['attributes']['class'][] = 'js-oi-forms';
-		$this->form['attributes']['method']  = ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method;
+		$this->form['attributes']['method'] = ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method;
 
 		// добавление поля action, чтобы по нему дергать wp-ajax
 		$this->form['content'][] = [
@@ -120,17 +120,17 @@ abstract class forms {
 
 	protected function addSpecialClasses( $data ) {
 		foreach ( $data as $i => $element ) {
-/*			if ( ! empty( $field_id = $element['attributes']['id'] ) ) {
-				if ( ! empty( $element['attributes']['class'] ) ) {
-					$data[ $i ]['attributes']['class']   = explode( ' ', $data[ $i ]['attributes']['class'] );
-					$data[ $i ]['attributes']['class'][] = 'js-form-control-' . $field_id;
-					$data[ $i ]['attributes']['class'][] = $field_id;
-					$data[ $i ]['attributes']['class']   = join( ' ', $data[ $i ]['attributes']['class'] );
-				}
-				else {
-					$data[ $i ]['attributes']['class'] = 'js-form-control-' . $field_id;
-				}
-			}*/
+			/*			if ( ! empty( $field_id = $element['attributes']['id'] ) ) {
+							if ( ! empty( $element['attributes']['class'] ) ) {
+								$data[ $i ]['attributes']['class']   = explode( ' ', $data[ $i ]['attributes']['class'] );
+								$data[ $i ]['attributes']['class'][] = 'js-form-control-' . $field_id;
+								$data[ $i ]['attributes']['class'][] = $field_id;
+								$data[ $i ]['attributes']['class']   = join( ' ', $data[ $i ]['attributes']['class'] );
+							}
+							else {
+								$data[ $i ]['attributes']['class'] = 'js-form-control-' . $field_id;
+							}
+						}*/
 
 			// if element content is not empty and it's an array
 			if ( ! empty( $data[ $i ]['content'] ) && is_array( $data[ $i ]['content'] ) ) {
@@ -172,9 +172,16 @@ abstract class forms {
 						case 'select':
 							// loop for content(select options)
 							foreach ( $data[ $i ]['content'] as $j => $item ) {
-								// if option value in values list
-								if ( in_array( $item['attributes']['value'], $this->values[ $element['attributes']['name'] ] ) ) {
-									$data[ $i ]['content'][ $j ]['attributes']['selected'] = true;
+								if ( is_array( $this->values[ $element['attributes']['name'] ] ) ) {
+									// if option value in values list
+									if ( in_array( $item['attributes']['value'], $this->values[ $element['attributes']['name'] ] ) ) {
+										$data[ $i ]['content'][ $j ]['attributes']['selected'] = true;
+									}
+								}
+								else {
+									if ( $item['attributes']['value'] == $this->values[ $element['attributes']['name'] ] ) {
+										$data[ $i ]['content'][ $j ]['attributes']['selected'] = true;
+									}
 								}
 							}
 							break;
@@ -320,14 +327,14 @@ abstract class forms {
 	public function get( $request ) {
 
 		// return data if it has errors
-		if(!empty($this->data['errors'])){
+		if ( ! empty( $this->data['errors'] ) ) {
 			return $this->data;
 		}
 		// построение формы с обязательными полями и значениями
 		$this->build( $request );
 
 		// return data if it has errors
-		if(!empty($this->data['errors'])){
+		if ( ! empty( $this->data['errors'] ) ) {
 			return $this->data;
 		}
 
