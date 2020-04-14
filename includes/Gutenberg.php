@@ -261,6 +261,43 @@ class Gutenberg {
 
 		return $fieldsSet;
 	}
+
+	public static function set($post,$allowedContentTags){
+		foreach ( $post['block_content'] as $i => $value ) {
+			if ( ! empty( $post['block_content'][ $i ] ) ) {
+				$post['block_content'][ $i ] = self::simplify( $post['block_content'][ $i ], $allowedContentTags );
+				$options                     = ! empty( $post['block_options'][ $i ] ) ? ' ' . stripslashes( $post['block_options'][ $i ] ) : '';
+				$optionsArray                = ! empty( $options ) ? (array) json_decode( trim( $options ) ) : [];
+				list( $tagType ) = explode( ' ', $post['block_type'][ $i ] );
+				switch ( $tagType ) {
+					case 'paragraph':
+						$tag = 'p';
+						break;
+					case 'heading':
+						$tag = 'h';
+
+						if ( ! empty( $optionsArray['level'] ) ) {
+							$tag .= $optionsArray['level'];
+						}
+						else {
+							$tag .= '2';
+						}
+						break;
+					case 'image':
+						$tag = '';
+						break;
+				}
+				$tagStart                    = ! empty( $tag ) ? "<{$tag}>" : '';
+				$tagEnd                      = ! empty( $tag ) ? "</{$tag}>" : '';
+				$post['block_content'][ $i ] = '<!-- wp:' . $tagType . $options . ' -->' . PHP_EOL
+				                               . $tagStart . $post['block_content'][ $i ] . $tagEnd . PHP_EOL
+				                               . '<!-- /wp:' . $tagType . ' -->' . PHP_EOL
+				                               . PHP_EOL;
+			}
+		}
+
+		return join( '', $post['block_content'] );
+	}
 }
 
 // eof

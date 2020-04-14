@@ -381,44 +381,8 @@ class Post extends forms {
 			}
 		}
 
-		$post['post_title'] = ! empty( $post['post_title'] ) ? $this->simplify( $post['post_title'] ) : 'no-name';
-		foreach ( $post['block_content'] as $i => $value ) {
-			if ( ! empty( $post['block_content'][ $i ] ) ) {
-				$post['block_content'][ $i ] = $this->simplify( $post['block_content'][ $i ], $this->allowedContentTags );
-				$options                     = ! empty( $post['block_options'][ $i ] ) ? ' ' . stripslashes( $post['block_options'][ $i ] ) : '';
-				$optionsArray                = ! empty( $options ) ? (array) json_decode( trim( $options ) ) : [];
-//				pr( __LINE__, $optionsArray );
-				list( $tagType ) = explode( ' ', $post['block_type'][ $i ] );
-				switch ( $tagType ) {
-					case 'paragraph':
-						$tag = 'p';
-						break;
-					case 'heading':
-						$tag = 'h';
-
-						if ( ! empty( $optionsArray['level'] ) ) {
-							$tag .= $optionsArray['level'];
-						}
-						else {
-							$tag .= '2';
-						}
-						break;
-					case 'image':
-						$tag = '';
-						break;
-				}
-				$tagStart                    = ! empty( $tag ) ? "<{$tag}>" : '';
-				$tagEnd                      = ! empty( $tag ) ? "</{$tag}>" : '';
-				$post['block_content'][ $i ] = '<!-- wp:' . $tagType . $options . ' -->' . PHP_EOL
-				                               . $tagStart . $post['block_content'][ $i ] . $tagEnd . PHP_EOL
-				                               . '<!-- /wp:' . $tagType . ' -->' . PHP_EOL
-				                               . PHP_EOL;
-//				pr( __LINE__, $post['block_content'][ $i ], true );
-			}
-		}
-
-//		die;
-		$post['post_content']   = join( '', $post['block_content'] );
+		$post['post_title']     = ! empty( $post['post_title'] ) ? $this->simplify( $post['post_title'] ) : 'no-name';
+		$post['post_content']   = Gutenberg::set( $post, $this->allowedContentTags );
 		$post['post_type']      = 'post';
 		$post['comment_status'] = 'open';
 		$post['post_category']  = ! empty( $post['post_category'] ) ? array_map( 'absint', explode( ',', $post['post_category'] ) ) : [];
