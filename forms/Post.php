@@ -220,6 +220,82 @@ class Post extends forms {
 			],
 		];
 
+		// submit button
+		$fields[] = [
+			'type'       => 'div',
+			'attributes' => [
+				'class' => bem( 'status-block js.counter' ),
+			],
+			'content'    => [
+				[
+					'type'       => 'div',
+					'attributes' => [
+						'class' => bem( 'status-block.row' ),
+					],
+					'content'    => [
+						[
+							'type'       => 'div',
+							'attributes' => [
+								'class' => bem( 'status-block.cell' ),
+							],
+							'content'    => __( 'Length', __NAMESPACE__ ),
+						],
+						[
+							'type'       => 'div',
+							'attributes' => [
+								'class' => bem( 'status-block.cell js.counter.part._length' ),
+							],
+							'content'    => '0',
+						],
+					],
+				],
+				[
+					'type'       => 'div',
+					'attributes' => [
+						'class' => bem( 'status-block.row' ),
+					],
+					'content'    => [
+						[
+							'type'       => 'div',
+							'attributes' => [
+								'class' => bem( 'status-block.cell' ),
+							],
+							'content'    => __( 'Letters', __NAMESPACE__ ),
+						],
+						[
+							'type'       => 'div',
+							'attributes' => [
+								'class' => bem( 'status-block.cell js.counter.part._letters' ),
+							],
+							'content'    => 0,
+						],
+					],
+				],
+				[
+					'type'       => 'div',
+					'attributes' => [
+						'class' => bem( 'status-block.row' ),
+					],
+					'content'    => [
+						[
+							'type'       => 'div',
+							'attributes' => [
+								'class' => bem( 'status-block.cell' ),
+							],
+							'content'    => __( 'Words', __NAMESPACE__ ),
+						],
+						[
+							'type'       => 'div',
+							'attributes' => [
+								'class' => bem( 'status-block.cell js.counter.part._words' ),
+							],
+							'content'    => 0,
+						],
+					],
+				],
+			],
+		];
+
 		// loop for fields
 		foreach ( $fields as $i => $field ) {
 			// if it is not a button
@@ -237,11 +313,17 @@ class Post extends forms {
 				                        . '</div>';
 			}
 		}
-
-		$form = [
+		$fields[] = [
+			'type'       => 'ul',
+			'attributes' => [
+				'class' => bem( 'js.messages' ),
+			],
+		];
+		$form     = [
 			'type'       => 'form',
 			'attributes' => [
 				'method' => 'post',
+				'class'  => bem( 'js.form' ),
 			],
 			'content'    => $fields,
 		];
