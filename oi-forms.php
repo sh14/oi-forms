@@ -87,16 +87,15 @@ function get_forms( $data ) {
 
 		return [
 			'errors' => [
-				__( 'Свойство', __NAMESPACE__ )
-				. ' "' . $data['request'] . '" '
-				. __( 'не определено.', __NAMESPACE__ ),
+				sprintf( __( '"%s" property does not allowed or does not set.', __NAMESPACE__ ), $data['request'] )
 			],
 		];
 	}
 
 	return [
 		'errors' => [
-			__( 'Форма "' . $class . '" не найдена.', __NAMESPACE__ ),
+			__( 'Форма "' . $class . '" не найдена.' . $_SERVER[ REQUEST_URI ], __NAMESPACE__ ),
+			sprintf( __( 'The form "%s" is not found or does not exist.', __NAMESPACE__ ), $class )
 		],
 	];
 }

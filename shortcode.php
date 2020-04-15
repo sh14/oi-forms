@@ -63,7 +63,8 @@ function update_forms() {
 	}
 	if ( ! empty( $_POST['action'] ) && 'forms_ajax' == $_POST['action'] ) {
 		$data = $_POST;
-	} else if ( ! empty( $_GET['action'] ) && 'forms_ajax' == $_GET['action'] ) {
+	}
+	else if ( ! empty( $_GET['action'] ) && 'forms_ajax' == $_GET['action'] ) {
 		$data = $_GET;
 	}
 
@@ -87,6 +88,7 @@ function update_forms() {
 			}
 		}
 	}
+
 	return false;
 }
 
