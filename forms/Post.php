@@ -411,7 +411,7 @@ class Post extends forms {
 	 *
 	 * @return array
 	 */
-	public function update() {
+	public function update( $request ) {
 
 		// user cant update if has not enough privileges
 		if ( ! isRole( 'contributor' ) ) {
@@ -424,7 +424,7 @@ class Post extends forms {
 			];
 		}
 
-		$post = $_POST;
+		$post = $request;
 
 		// if pointed post is editing
 		if ( ! empty( $this->post_id ) ) {
@@ -487,7 +487,7 @@ class Post extends forms {
 		// если при сохранении публикации не произошло ошибок
 		if ( ! is_wp_error( $this->post_id ) ) {
 
-			$post['post_id']    = $this->post_id;
+			$post['ID']         = $this->post_id;
 			$post['post_title'] = 'no-name' != $post['post_title'] ? $post['post_title'] : '';
 
 			/*			// сохранение "обложки" записи

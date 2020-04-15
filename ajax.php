@@ -41,7 +41,7 @@ function forms_ajax() {
 	wp_send_json_error();
 }
 
-add_action( 'wp_ajax_' . __NAMESPACE__ . '_ajax', __NAMESPACE__ . '\\forms_ajax' );
-add_action( 'wp_ajax_nopriv_' . __NAMESPACE__ . '_ajax', __NAMESPACE__ . '\\forms_ajax' );
+add_action( 'wp_ajax_' . __NAMESPACE__ . '_ajax', __NAMESPACE__ . '\forms_ajax' );
+add_action( 'wp_ajax_nopriv_' . __NAMESPACE__ . '_ajax', __NAMESPACE__ . '\forms_ajax' );
 
 // eof

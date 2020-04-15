@@ -48,7 +48,7 @@ require 'includes/Element.php';
 require 'includes/Gutenberg.php';
 require 'shortcode.php';
 require 'ajax.php';
-require 'rest-api.php';
+//require 'rest-api.php';
 
 // require forms from current plugin
 require_all_in( get_plugin_path() . '/forms/' );
@@ -67,6 +67,7 @@ function get_forms( $data ) {
 		// значение опеределяет результат какого метода необходимо вернуть: update, get
 		'request' => 'get',
 	] );
+
 	// преобразование id формы в имя класса с пространством имен
 	$class = str_replace( '/', '\\', $data['form_id'] );
 	$class = str_replace( '-', '\\', $class );
