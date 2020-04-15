@@ -54,7 +54,16 @@ class Post extends forms {
 				return "<{$tag}>";
 			}, $this->allowedContentTags ) );
 
-			wp_enqueue_script( 'oi-form-post', get_plugin_url() . 'assets/js/Post.js', [ 'oijq' ], Init::$data['version'], true );
+			$handle = ( str_replace( '\\', '', __CLASS__ ) );
+			wp_enqueue_script( $handle, get_plugin_url() . 'assets/js/Post.js', [ 'oijq' ], Init::$data['version'], true );
+			wp_localize_script(
+				$handle,
+				$handle,
+				[
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+//			'ajax_nonce' => wp_create_nonce( 'oiproaccount' ),
+				]
+			);
 		}
 	}
 
@@ -271,8 +280,6 @@ class Post extends forms {
 			$post['post_date'] = str_replace( ' ', 'T', $post['post_date'] );
 		}
 		$this->values = $post;
-
-//		pr( $post );
 
 		return $post;
 	}
