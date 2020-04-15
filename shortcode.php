@@ -47,13 +47,17 @@ function shortcode( $atts ) {
 add_shortcode( 'form', __NAMESPACE__ . '\shortcode' );
 
 /**
- * функция обработки отправленной формы
+ * Updating form via classic send data mode with page reload
  *
  * @return bool
  */
 function update_forms() {
 	$data = [];
 
+	// if admin-ajax.php was requested, kill that function to allow wp ajax to work
+	if ( ! empty( $_SERVER['REQUEST_URI'] ) && strpos( $_SERVER['REQUEST_URI'], 'admin-ajax.php' ) > 0 ) {
+		return false;
+	}
 	if ( empty( $_POST['action'] ) && empty( $_GET['action'] ) ) {
 		return false;
 	}
