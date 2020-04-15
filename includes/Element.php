@@ -397,7 +397,7 @@ class Element {
 		$html = join( ' ', [ $element['type'], $attributes ] );
 
 		// get element content
-		$content = ! empty( $element['content'] ) ? self::get( $element['content'] ) : '';
+		$content = isset( $element['content'] ) ? self::get( $element['content'] ) : '';
 
 		// если элемент парный
 		if ( ! in_array( $element['type'], [ 'input', ] ) ) {
