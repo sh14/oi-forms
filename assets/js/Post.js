@@ -19,6 +19,7 @@ function isPageLocked () {
  * @param messageSelector
  */
 function lockPage (status) {
+  if (!status) status = null
   pageLock = status
   // const element = document.querySelector(messageSelector)
   // if (element) element.innerHTML = status ? '☒︎' : ''
