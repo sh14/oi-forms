@@ -38,7 +38,13 @@ class Post extends forms {
 		else {
 
 			$this->user_id = ! empty( $_GET['user_id'] ) ? $_GET['user_id'] : 0;
-			$this->post_id = ! empty( $_GET['post_id'] ) ? $_GET['post_id'] : 0;
+
+			if ( ! empty( $request['ID'] ) ) {
+				$this->post_id = $request['ID'];
+			}
+			else {
+				$this->post_id = ! empty( $_GET['post_id'] ) ? $_GET['post_id'] : 0;
+			}
 
 			// getting values from DB
 			$this->values = $this->get_values( $request );
