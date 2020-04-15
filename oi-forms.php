@@ -69,7 +69,7 @@ function get_forms( $data ) {
 	] );
 	// преобразование id формы в имя класса с пространством имен
 	$class = str_replace( '/', '\\', $data['form_id'] );
-
+	$class = str_replace( '-', '\\', $class );
 
 	// если указанный класс существует
 	if ( class_exists( $class ) ) {
@@ -78,7 +78,7 @@ function get_forms( $data ) {
 		$form = new $class( $data );
 
 		// если запрошен один из разрешенных методов и он определен
-		if ( in_array( $data['request'], [ 'update', 'get' ] ) && method_exists( $form, $data['request'] ) ) {
+		if ( in_array( $data['request'], [ 'get', 'update', ] ) && method_exists( $form, $data['request'] ) ) {
 //			return $data;
 
 			// возвращается рузултат выполнения
