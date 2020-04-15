@@ -70,7 +70,8 @@ function update_forms() {
 	if ( ! empty( $data ) ) {
 
 		// преобразование id формы в имя класса с пространством имен
-		$class = str_replace( '-', '\\', $data['form_id'] );
+		$class = str_replace( '/', '\\', $data['form_id'] );
+		$class = str_replace( '-', '\\', $class );
 
 		// если указанный класс существует
 		if ( class_exists( $class ) ) {
