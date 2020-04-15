@@ -102,3 +102,139 @@ on('focus click', '.js__block-content', (event) => {
   blockContent.toggleClass('active', true)
 })
 
+on('submit', '.js__form', function (event) {
+  event.preventDefault()
+  let form           = event.target
+  const localization = window[form.id.replace('-', '')]
+  cl(localization)
+  let submits = form.querySelectorAll('[type="submit"]')
+  if (isRequiredEmpty(form)) {
+    submits.forEach(function (submit) {
+      // submit.toggleClass('error', true)
+    })
+
+    echo('.js__messages', 'Fields that marked red should be filed', 30, 'li')
+
+    setTimeout(function () {
+      submits.forEach(function (submit) {
+        // submit.toggleClass('error', false)
+      })
+    }, 300)
+
+    return
+  }
+
+  submits.forEach(function (submit) {
+    submit.toggleClass('error', false)
+    // setState(submit, 'wait')
+  })
+
+  let data = form.serialize()
+  cl(data)
+  // return
+  // for(let key in data){
+  //   if(data.hasOwnProperty(key)){
+  //     data[key]=encodeURIComponent(data[key])
+  //   }
+  // }
+  // cl(data)
+  get_content({
+    method: 'post',
+    url: localization.ajaxUrl,
+    data: data,
+  }).then(function (result) {
+    result = JSON.parse(result)
+
+    //cl( result );
+
+    if (true === result.success) {
+
+      result = result.data
+      setUrl({ title: 'Saved', html: '' }, '?post_id=' + result.ID)
+
+      lockPage(false)
+
+      // коррекция данных в обычных полях формы
+      let names = ['ID', 'tags_input', 'post_title',]
+      names.forEach((name) => {
+        let control = form.querySelector('[name=' + name + ']')
+        if (control) {
+          if ('tags_input' === name) {
+            control.value = result[name].join(', ')
+          } else {
+            control.value = result[name]
+          }
+
+        }
+      })
+
+      // если текстовые блоки существуют
+      if (result['block_content']) {
+        result['block_content'].forEach(function (value, i) {
+          cl('[name="block_content[' + i + ']"]')
+          form.querySelector('[name="block_content[' + i + ']"]').value = result['block_content'][i] ? stripSlashes(result['block_content'][i]) : ''
+        })
+      }
+
+      echo('.js__messages', 'Post has been saved', 5, 'li')
+
+      // setState(form.querySelector('.js-copy-box'), 'show')
+
+      // let element = form.querySelector('.js-thumbnail')
+      // if (undefined !== element && null !== element) {
+      //   setState(element, 'show')
+      // }
+
+      countAll ('.js__form', '.js__block-content', '.js__part')
+    } else {
+
+      if (result.data.errors) {
+        for (let error of result.data.errors) {
+          echo('.js__messages', error, 5, 'li')
+        }
+      } else {
+        echo('.js__messages', 'There was an error while saving', 10, 'li')
+      }
+      // cl(result)
+    }
+    submits.forEach(function (submit) {
+      setState(submit, 'produce')
+    })
+  }).catch(function (err) {
+    if (err.hasOwnProperty('statusText')) {
+      let errorMessage = err.statusText + ', status: ' + err.status + '.'
+      echo('.js__messages', 'There was an error while saving. Check filling correction of all fields then try again. ' + errorMessage, 30, 'li')
+      cl(err)
+    } else {
+      console.error(err)
+    }
+  })
+})
+
+function countAll (formSelector, fieldsSelector, containerClass) {
+  const form   = document.querySelector(formSelector)
+  const fields = form.querySelectorAll(fieldsSelector)
+  if (fields) {
+    let count = {
+      length: 0,
+      letters: 0,
+      words: 0,
+    }
+    fields.forEach((field, index) => {
+      resizeTextarea(field)
+      cl(field)
+      const length = field.value.length
+      field.setAttribute('data-length', length)
+      count.length += length
+      const words = field.value.match(/[a-zA-Zа-яА-Я0-9]*/g).filter(word => word.length > 0)
+      count.letters += words.join('').length
+      count.words += words.length
+    })
+    for (const key in count) {
+      const container = form.querySelector(containerClass + '_' + key)
+      if (container) {
+        container.innerHTML = count[key]
+      }
+    }
+  }
+}
