@@ -379,7 +379,9 @@ class Post extends forms {
 		}
 
 		$post['post_title']     = ! empty( $post['post_title'] ) ? $this->simplify( $post['post_title'] ) : 'no-name';
-		$post['post_content']   = Gutenberg::set( $post, $this->allowedContentTags );
+		$content                = Gutenberg::set( $post, $this->allowedContentTags );
+		$post['block_content']  = $content['block_content'];
+		$post['post_content']   = $content['post_content'];
 		$post['post_type']      = 'post';
 		$post['comment_status'] = 'open';
 		$post['post_category']  = ! empty( $post['post_category'] ) ? array_map( 'absint', explode( ',', $post['post_category'] ) ) : [];

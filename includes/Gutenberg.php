@@ -46,8 +46,8 @@ class Gutenberg {
 		$templateBlockOptions = [
 			'type'       => 'hidden',
 			'attributes' => [
-				'name' => 'block_options[]',
-				'data' => [
+				'name'  => 'block_options[]',
+				'data'  => [
 					'name' => 'block_options',
 				],
 				'class' => bem( 'js.block-options' ),
@@ -262,7 +262,8 @@ class Gutenberg {
 		return $fieldsSet;
 	}
 
-	public static function set($post,$allowedContentTags){
+	public static function set( $post, $allowedContentTags ) {
+		$post['post_content'] = [];
 		foreach ( $post['block_content'] as $i => $value ) {
 			if ( ! empty( $post['block_content'][ $i ] ) ) {
 				$post['block_content'][ $i ] = self::simplify( $post['block_content'][ $i ], $allowedContentTags );
@@ -287,16 +288,17 @@ class Gutenberg {
 						$tag = '';
 						break;
 				}
-				$tagStart                    = ! empty( $tag ) ? "<{$tag}>" : '';
-				$tagEnd                      = ! empty( $tag ) ? "</{$tag}>" : '';
-				$post['block_content'][ $i ] = '<!-- wp:' . $tagType . $options . ' -->' . PHP_EOL
-				                               . $tagStart . $post['block_content'][ $i ] . $tagEnd . PHP_EOL
-				                               . '<!-- /wp:' . $tagType . ' -->' . PHP_EOL
-				                               . PHP_EOL;
+				$tagStart                   = ! empty( $tag ) ? "<{$tag}>" : '';
+				$tagEnd                     = ! empty( $tag ) ? "</{$tag}>" : '';
+				$post['post_content'][ $i ] = '<!-- wp:' . $tagType . $options . ' -->' . PHP_EOL
+				                              . $tagStart . $post['block_content'][ $i ] . $tagEnd . PHP_EOL
+				                              . '<!-- /wp:' . $tagType . ' -->' . PHP_EOL
+				                              . PHP_EOL;
 			}
 		}
+		$post['post_content'] = join( '', $post['post_content'] );
 
-		return join( '', $post['block_content'] );
+		return $post;
 	}
 }
 
