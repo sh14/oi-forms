@@ -83,7 +83,7 @@ function submit (form) {
 
   let data = form.serialize()
 
-  get_content({
+  sendRequest({
     method: 'post',
     url: localization['ajaxUrl'],
     data: data,
