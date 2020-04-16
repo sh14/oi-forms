@@ -21,6 +21,10 @@ color__border_active = #ccc
 
   &__submit
     position: relative;
+    border 3px solid transparent
+
+    &_unsaved
+      border-color red
 
   &__control
     -webkit-appearance: none;
@@ -151,11 +155,14 @@ color__border_active = #ccc
   line-height 1
   padding 5px 0
   border-style: solid;
-  border-color: #e6e7e7;
-  border-width: 1px 1px 0 0;
+  border-color: transparent
+  border-width: 3px
   z-index: 9999999;
   height: 32px;
   cursor pointer
+
+  &_unsaved
+    border-color red
 
   &__row
     display flex
@@ -169,6 +176,7 @@ color__border_active = #ccc
   &__cell:last-child
     font-family: monospace
     color #444 !important
+
 
 .disabled
   background-color #ccc !important
