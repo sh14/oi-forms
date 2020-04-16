@@ -14,15 +14,20 @@ function isPageLocked () {
 }
 
 /**
+ * Set page status
  *
  * @param status
- * @param messageSelector
  */
 function lockPage (status) {
-  if (!status) status = null
+  document.querySelectorAll('.js__submit').forEach((element) => {
+    element.toggleClass('unsaved', status)
+  })
+
+  if (!status) {status = null} else {
+    document.title = '* ' + document.title.replace('* ', '')
+  }
   pageLock = status
-  // const element = document.querySelector(messageSelector)
-  // if (element) element.innerHTML = status ? '☒︎' : ''
+
 }
 
 /**
