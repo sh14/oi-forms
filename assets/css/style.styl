@@ -2,17 +2,73 @@ color__border = #fff
 color__border_active = #ccc
 
 .form
+  font-family sans-serif
+  font-weight 300
+  font-size 1.6rem
+  color #000
+
   &__group
     position relative
+    margin 0 0 1em 0
+
+  &__label
+    font-weight 400
+
+  &__hint
+    font-size 1.2rem
+    text-align right
+    opacity .6
+
+  &__submit
+    position: relative;
+
+  &__control
+    -webkit-appearance: none;
+    background: #fff;
+    border-radius: 0;
+    border-color #dcd7ca
+    border-style: solid;
+    border-width: 0.1rem;
+    box-shadow: none;
+    display: block;
+    font-size: 1.6rem;
+    letter-spacing: -0.015em;
+    margin: 0;
+    max-width: 100%;
+    padding: 1.5rem 1.8rem;
+    width: 100%;
+
+    /*
+    &_select
+      position relative
+      &:after
+        display block
+        content ''
+        position absolute
+        right .2em
+        top 50%
+        margin-top -3px
+        border-width 6px
+        border-style solid
+        border-color #000
+    */
+
+    &:focus
+      border-color #ccc
+      outline none
 
 .dynamic
+  margin 0 0 1em 0
   border-color: color__border_active
   border-width: 1px 0 0 0;
   border-style: solid;
   padding 0
 
   &__legend
-    margin: 0 2rem
+    margin: 0 2em
+    font-family sans-serif
+    font-weight 400
+    font-size 1.6rem
 
   &__group
     position relative
@@ -81,3 +137,78 @@ color__border_active = #ccc
       &:hover, &:active, &:focus
         text-decoration none
 
+.status-block
+  font-family sans-serif
+  font-size 10px
+  font-weight 300
+  display flex
+  flex-direction row
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #fff
+  color #aaa
+  line-height 1
+  padding 5px 0
+  border-style: solid;
+  border-color: #e6e7e7;
+  border-width: 1px 1px 0 0;
+  z-index: 9999999;
+  height: 32px;
+  cursor pointer
+
+  &__row
+    display flex
+    flex-direction column-reverse
+    justify-content: space-between;
+
+  &__cell
+    padding 0 0.3em
+    text-align: center
+
+  &__cell:last-child
+    font-family: monospace
+    color #444 !important
+
+.disabled
+  background-color #ccc !important
+  color #666 !important
+
+.preloader
+  padding-right: 2.4em;
+
+  &:after
+    position: absolute;
+    box-sizing: border-box;
+    content: '';
+    top: 50%;
+    right: .5em;
+    margin-top: -0.7em;
+    width: 1.4em;
+    height: 1.4em;
+    display: inline-block;
+    padding: 0px;
+    border-radius: 100%;
+    border: 2px solid;
+    border-top-color: rgba(0, 0, 0, 0.65);
+    border-bottom-color: rgba(0, 0, 0, 0.15);
+    border-left-color: rgba(0, 0, 0, 0.65);
+    border-right-color: rgba(0, 0, 0, 0.15);
+    -webkit-animation: preloader 0.8s linear infinite;
+    animation: preloader 0.8s linear infinite;
+
+    @keyframes preloader
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+
+    @-webkit-keyframes preloader
+      from {
+        -webkit-transform: rotate(0deg);
+      }
+      to {
+        -webkit-transform: rotate(360deg);
+      }
