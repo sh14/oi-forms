@@ -148,7 +148,9 @@ function submit (form) {
 // reindex all blocks
 indexDynamicFields('.js__wp-block')
 
-on('change', '#myTheme-Post [value]', () => lockPage(true))
+countText('.js__form', '.js__block-content', '.js__part')
+
+on('change', '.js__form [name]', () => lockPage(true))
 
 // Listen for click on a plus button
 on('click', '.js__add-wp-block', (event) => {
@@ -157,7 +159,9 @@ on('click', '.js__add-wp-block', (event) => {
 
 // Listen for click on a plus button
 on('keydown keyup', '.js__block-content', (event) => {
-  resizeTextarea(event.target)
+  // resizeTextarea(event.target)
+  countText('.js__form', '.js__block-content', '.js__part')
+
   if (13 === event.keyCode) {
     createNewBlock(event)
   }
@@ -185,13 +189,13 @@ on('focus click', '.js__block-content', (event) => {
   const blockType    = block.querySelector('.js__block-type')
   const add          = block.querySelector('.js__add')
 
-  document.querySelectorAll('.js__block-type').forEach((element, index) => {
+  document.querySelectorAll('.js__block-type').forEach((element) => {
     element.toggleClass('active', false)
   })
-  document.querySelectorAll('.js__block-content').forEach((element, index) => {
+  document.querySelectorAll('.js__block-content').forEach((element) => {
     element.toggleClass('active', false)
   })
-  document.querySelectorAll('.js__add').forEach((element, index) => {
+  document.querySelectorAll('.js__add').forEach((element) => {
     element.toggleClass('active', false)
   })
   blockContent.toggleClass('active', false)
