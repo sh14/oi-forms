@@ -216,7 +216,7 @@ class Post extends forms {
 			'content'    => __( 'Submit', __NAMESPACE__ ),
 			'attributes' => [
 				'type'  => 'submit',
-				'class' => bem( 'form.submit' ),
+				'class' => bem( 'form.submit js.submit' ),
 			],
 		];
 
@@ -224,13 +224,14 @@ class Post extends forms {
 		$fields[] = [
 			'type'       => 'div',
 			'attributes' => [
-				'class' => bem( 'status-block js.counter' ),
+				'class' => bem( 'status-block js.counter.submit' ),
 			],
 			'content'    => [
 				[
 					'type'       => 'div',
 					'attributes' => [
 						'class' => bem( 'status-block.row' ),
+						'title' => __( 'Number of symbols in the content', __NAMESPACE__ ),
 					],
 					'content'    => [
 						[
@@ -253,6 +254,7 @@ class Post extends forms {
 					'type'       => 'div',
 					'attributes' => [
 						'class' => bem( 'status-block.row' ),
+						'title' => __( 'Number of letters in the content', __NAMESPACE__ ),
 					],
 					'content'    => [
 						[
@@ -275,6 +277,7 @@ class Post extends forms {
 					'type'       => 'div',
 					'attributes' => [
 						'class' => bem( 'status-block.row' ),
+						'title' => __( 'Number of words in the content', __NAMESPACE__ ),
 					],
 					'content'    => [
 						[
@@ -294,6 +297,7 @@ class Post extends forms {
 					],
 				],
 			],
+			'html'       => '%%',
 		];
 
 		// loop for fields
