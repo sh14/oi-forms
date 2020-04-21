@@ -102,7 +102,7 @@ $form = [
 	],
 ];
 
-pr( Element::prepare( $form ) );
+print_r( Element::prepare( $form ) );
 pr( Element::get( $form ) );
 
 // eof

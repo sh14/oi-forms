@@ -14,7 +14,7 @@
 
 namespace forms;
 
-use WP_REST_Server;
+//use WP_REST_Server;
 
 
 function pr( $line, $d = [], $specialchars = false ) {
@@ -40,21 +40,19 @@ function is_json( $data ) {
 	return json_last_error() == JSON_ERROR_NONE;
 }
 
-require 'init.php';
+require 'Init.php';
 require 'includes/templating.php';
 //require 'includes/FormBuilder.php';
-require 'includes/forms.php';
+require_once 'includes/forms.php';
 require 'includes/Element.php';
 require 'includes/Gutenberg.php';
 require 'shortcode.php';
 require 'ajax.php';
 //require 'rest-api.php';
 
-// require forms from current plugin
-require_all_in( get_plugin_path() . '/forms/' );
 // require forms from active theme
 require_all_in( WP_CONTENT_DIR . '/themes/' . get_stylesheet() . '/' . get_plugin_name() );
-
+// Init::$data['theme_path']
 /**
  * Функция обработки запроса на получение данных формы
  *
@@ -95,7 +93,6 @@ function get_forms( $data ) {
 
 	return [
 		'errors' => [
-			__( 'Форма "' . $class . '" не найдена.' . $_SERVER[ REQUEST_URI ], __NAMESPACE__ ),
 			sprintf( __( 'The form "%s" is not found or does not exist.', __NAMESPACE__ ), $class )
 		],
 	];
@@ -318,9 +315,6 @@ add_filter( 'forms_endpoints_filter', __NAMESPACE__ . '\\' . 'forms_endpoints', 
 */
 
 function register_scripts() {
-
-	wp_enqueue_style( 'oi-form-post', get_plugin_url() . 'assets/css/style.css', [], Init::$data['version'] );
-
 	wp_register_script(
 		'oijq',
 		get_site_url() . '/oijq/js/oijq.js',
