@@ -41,9 +41,9 @@ function is_json( $data ) {
 }
 
 require 'Init.php';
-require 'includes/templating.php';
-//require 'includes/FormBuilder.php';
-require_once 'includes/forms.php';
+// init
+Init::init();
+require 'includes/forms.php';
 require 'includes/Element.php';
 require 'includes/Gutenberg.php';
 require 'shortcode.php';
@@ -51,8 +51,8 @@ require 'ajax.php';
 //require 'rest-api.php';
 
 // require forms from active theme
-require_all_in( WP_CONTENT_DIR . '/themes/' . get_stylesheet() . '/' . get_plugin_name() );
-// Init::$data['theme_path']
+require_all_in( Init::$data['theme_path'] . Init::$data['slug'] );
+
 /**
  * Функция обработки запроса на получение данных формы
  *
