@@ -101,7 +101,7 @@ class Gutenberg {
 				'value' => 'remove',
 				'class' => bem( 'js.remove-wp-block' ),
 			],
-			'content'    => __( 'Remove block', __NAMESPACE__ ),
+			'content'    => __( 'Remove block', Init::$data['domain'] ),
 		];
 
 		return [

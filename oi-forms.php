@@ -46,9 +46,10 @@ Init::init();
 require 'includes/forms.php';
 require 'includes/Element.php';
 require 'includes/Gutenberg.php';
-require 'shortcode.php';
-require 'ajax.php';
-//require 'rest-api.php';
+require 'includes/shortcode.php';
+require 'includes/ajax.php';
+//require 'includes/rest-api.php';
+
 
 // require forms from active theme
 require_all_in( Init::$data['theme_path'] . Init::$data['slug'] );
@@ -86,14 +87,14 @@ function get_forms( $data ) {
 
 		return [
 			'errors' => [
-				sprintf( __( '"%s" property does not allowed or does not set.', __NAMESPACE__ ), $data['request'] )
+				sprintf( __( '"%s" property does not allowed or does not set.', Init::$data['domain'] ), $data['request'] )
 			],
 		];
 	}
 
 	return [
 		'errors' => [
-			sprintf( __( 'The form "%s" is not found or does not exist.', __NAMESPACE__ ), $class )
+			sprintf( __( 'The form "%s" is not found or does not exist.', Init::$data['domain'] ), $class )
 		],
 	];
 }

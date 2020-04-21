@@ -6,10 +6,6 @@
 
 Namespace forms;
 
-// init plugin data
-//Plugin::init();
-add_action( 'init', [ __NAMESPACE__ . '\Init', 'init' ] );
-
 /**
  * Class contains plugin information.
  *

@@ -8,6 +8,8 @@
 namespace Elements;
 
 
+use forms\Init;
+
 class Element {
 	public static $attributes = [];
 	public static $ids = [];
@@ -208,7 +210,7 @@ class Element {
 			if ( true == $attributes[ $key ]['required'] && false === $attributes[ $key ]['hideEmpty'] && empty( $value ) ) {
 
 				// add an error
-				self::$errors[] = __( sprintf( 'Key "%s" is required.', $key ), __NAMESPACE__ );
+				self::$errors[] = __( sprintf( 'Key "%s" is required.', $key ), Init::$data['domain'] );
 
 				// return empty value
 				return [];
@@ -466,7 +468,7 @@ class Element {
 	protected static function prepareElement( array $element ) {
 		// return empty string if type not set
 		if ( empty( $element['type'] ) ) {
-			self::$errors[] = __( 'The element type was not specified.', __NAMESPACE__ );
+			self::$errors[] = __( 'The element type was not specified.', Init::$data['domain'] );
 
 			return [];
 		}
