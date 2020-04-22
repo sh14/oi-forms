@@ -9,49 +9,49 @@ namespace forms;
 use Elements\Element;
 
 abstract class forms {
-	// имя функции, которая обрабатывает ajax запросы
+	// name of function that process AJAX requests
 	private $action = '';
-	// метод отправки данных
+	// request method
 	private $method = 'post';
 	// id формы
 	private $id = '';
-	// сформированный массив формы со значениями
+	// formed array of form with values
 	protected $form = [];
-	// отрендеренная форма в том виде, в котором запросил пользователь
+	// rendered form
 	protected $data = [];
-	// значения полей полученные с сервера
+	// form values
 	protected $values = [];
 
-	// список ошибок
+	// errors list
 	public $error = [];
 
 	public function __construct( $request ) {
 
-		// определение id формы по вызываемому классу в пространстве имен
+		// define form id by class
 		$this->id = str_replace( '\\', '-', get_called_class() );
 
-		// определение имени функции, которая обрабатывает ajax запросы
+		// define name of function which process AJAX request
 		$this->action = __NAMESPACE__ . '_ajax';
 
+		// if the INIT method exists
 		if ( method_exists( $this, 'init' ) ) {
 
-			// если есть инициализация
 			$this->init( $request );
 		}
 
-		// если есть ошибка
+		// if we have errors
 		if ( ! empty( $this->error ) ) {
 
-			// получение имен всех свойств класса
+			// get names of all class properties
 			$props = array_keys( get_object_vars( $this ) );
 
-			// определение текста ошибки
+			// define error message
 			$error = $this->error;
 
-			// перебор каждого свойства
+			// loop for class properties
 			foreach ( $props as $prop ) {
 
-				// установка значения свойства
+				// set property value
 				$this->$prop = [
 					'errors' => [
 						$error,

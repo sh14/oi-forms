@@ -49,13 +49,13 @@ class Element {
 	protected static function attributes() {
 		return [
 			'autofocus' => [
-				// тип
+				// type
 				'type'      => 'Boolean',
-				// значение по умолчанию
+				// default value
 				'default'   => false,
-				// скрывать, если значение пусто
+				// hide if value is empty
 				'hideEmpty' => true,
-				// значение атрибут обязательно должно быть указано
+				// points that field should not be empty
 				'required'  => false,
 			],
 			'disabled'  => [
@@ -123,31 +123,31 @@ class Element {
 				'default'   => '',
 				'hideEmpty' => true,
 				'required'  => false,
-				// первый разделяет сами элементы(например классы или свойста стилей),
-				// второй для ключа со значением(color:red), третий - составляющие имени
+				// first for elements(example: classes or style properties),
+				// second for key with value(example: color:red), third - name part(example: data-some-one)
 				'delimiter' => [ ';', ':', '-', ],
 			],
 		];
 	}
 
 	/**
-	 * Обработка атрибутов тега
+	 * Processing of tag's attributes
 	 *
 	 * @param array  $elementAttributes
 	 * @param array  $attributesList
 	 * @param string $prefix
 	 *
-	 * @return array - список строк вида 'ключ="значение"'
+	 * @return array - list of lines should looks like 'key="value"'
 	 */
 	private static function prepareAttributes( array $elementAttributes, $attributesList = [], $prefix = '' ) {
 
-		// если указан префикс, атрибут составной
+		// if there is a prefix, then the attribute is a composite
 		$keyPrefix = ! empty( $prefix ) ? $prefix . '-' : '';
 
 		// get attributes options
 		$attributes = self::attributes();
 
-		// перебор пользовательских атрибутов
+		// loop for user attributes
 		foreach ( $elementAttributes as $key => $value ) {
 			$key = strtolower( $key );
 
@@ -160,53 +160,53 @@ class Element {
 				}
 			}
 
-			// если значение атрибута является массивом, значит это составной атрибут, типа data
+			// if attribute value is an array then it is a composite attribute like a "data"
 			if ( is_array( $value ) ) {
 
-				// если тип атрибута определен и он - массив, например class может быть массивом
+				// if the attribute type is defined, and it is an array, then it can be a "class"
 				if ( ! empty( $attributes[ $key ]['type'] ) && 'Array' == $attributes[ $key ]['type'] ) {
 
-					// определяется разделитель элементов
+					// element delimiter definition
 					$delimiters = ! empty( $attributes[ $key ]['delimiter'] ) ? $attributes[ $key ]['delimiter'] : [ ' ' ];
 
-					// если разделитель не массив
+					// if the delimiter is not an array
 					if ( ! is_array( $delimiters ) ) {
 
-						// разделитель преобразуется в массив с одним элементом
+						// delimiter is converted to an array with one element
 						$delimiters = [ $delimiters ];
 					}
 
-					// если разделителей больше одного, определяется первый элемент и убирается из общего списка
+					//if there are more then one delimiters then the first element is determined and removed from the list
 					$delimiter = sizeof( $delimiters ) > 1 ? array_shift( $delimiters ) : $delimiters[0];
 
-					// массив преобразуется в строку, разделенную указанным разделителем
+					// the array is converted to a string with specific delimiters
 					$value = implode( $delimiter, self::prepareAttributeValues( $value, $delimiters ) );
 				}
 				else {
 
-					// метод перебирает вложенный список
+					// loop for inner list in the method
 					$attributesList = self::prepareAttributes( $value, $attributesList, $keyPrefix . $key );
 
-					// осуществляется переход к следующей итерации
+					// go to the next iteration
 					continue;
 				}
 			}
 
-			// если элемент не определен по умолчанию или указан префикс, значит идет перебор пользовательских атрибутов
+			// if an element is undefined by default or a prefix is set then loop for user attributes
 			if ( empty( $attributes[ $key ] ) || ! empty( $prefix ) ) {
 
-				// тип атрибута переопределяется на строку
+				// attribute type overrides to string
 				$attributes[ $key ]['type'] = 'String';
 
-				// атрибут не скрывается при пустом значении
+				// if the value is empty, then the attribute is not hidden
 				$attributes[ $key ]['hideEmpty'] = false;
 
-				// атрибут не являются обязательными
+				// attribute is not required
 				$attributes[ $key ]['required'] = false;
 			}
 
 
-			// если атрибут обязателен и он пуст
+			// if the attribute is required and it is empty
 			if ( true == $attributes[ $key ]['required'] && false === $attributes[ $key ]['hideEmpty'] && empty( $value ) ) {
 
 				// add an error
@@ -216,31 +216,31 @@ class Element {
 				return [];
 			}
 
-			// если значение определено как пустое или не указано
+			// if the value is empty
 			if ( empty( $value ) ) {
 
-				// если при отсутствии значения атрибут должен скрываться
+				// if the attribute should be hidden
 				if ( true == $attributes[ $key ]['hideEmpty'] ) {
 
-					// осуществляется переход к следующей итерации
+					// go to the next iteration
 					continue;
 				}
-				else // если указано значение по умолчанию
+				else // if default value is set
 					if ( ! empty( $attributes[ $key ]['default'] ) ) {
 
-						// значение по умолчанию устанавливается в качестве значения
+						// set default value as $value
 						$value = $attributes[ $key ]['default'];
 					}
 			}
 
-			// если тип атрибута
+			// if attribute type is
 			switch ( $attributes[ $key ]['type'] ) {
 				case 'Boolean':
 
-					// по умолчанию включен или пользователь указал не пустое значение
+					// if it is true by default or user set something
 					if ( true == $attributes[ $key ]['type'] || ! empty( $value ) ) {
 
-						// добавляется название атрибута
+						// add the attribute name
 						$attributesList[ $key ] = $key;
 					}
 					break;
@@ -251,12 +251,12 @@ class Element {
 					break;
 				case 'Number':
 
-					// добавляется название атрибута с числовым значением
+					// add the attribute name with number as value
 					$attributesList[ $key ] = floatval( $value );
 					break;
 				case 'Array':
 
-					// добавляется название атрибута с текстовым значением
+					// add the attribute name with text as value
 					$attributesList[ $key ] = htmlspecialchars( $value );
 					break;
 			}
@@ -288,79 +288,79 @@ class Element {
 
 
 	/**
-	 * Обработка списков значений атрибутов, например классов или стилей
+	 * Processing of attributes values lists. Classes or styles for example.
 	 *
 	 * @param array  $attributeValues
 	 * @param string $delimiter
 	 * @param array  $values
 	 * @param string $prefix
 	 *
-	 * @return array - список строк значений, сформированных для указанного атрибута
+	 * @return array - list of string values, generated for the specified attribute
 	 */
 	private static function prepareAttributeValues( array $attributeValues, $delimiter = ' ', $values = [], $prefix = '' ) {
 
 //		$keyPrefix = '';
 
-		// если разделитель не массив
+		// if the delimiter is not an array
 		if ( ! is_array( $delimiter ) ) {
 
-			// разделитель преобразуется в массив с одним элементом
+			// delimiter is converted to an array with one element
 			$delimiter = [ $delimiter ];
 		}
 
-		// перебор значений атрибута
+		// loop for attribute values
 		foreach ( $attributeValues as $key => $value ) {
 
-			// если значением является не массив
+			// if value is not an array
 			if ( ! is_array( $value ) ) {
 
-				// берется первый разделитель - для составляющей имени значения(border-width-top)
+				// getting the first delimiter for value name component(border-width-top)
 				$separator = $delimiter[0];
 			}
 			else {
 
-				// берется второй разделитель - для ключа со значением(color:red)
+				// getting the second delimiter for key with a value(color:red)
 				$separator = $delimiter[1];
 			}
 
 			if ( ! empty( $prefix ) ) {
-				// если массив нумерованный
+				// if it is a numeric array
 				if ( is_numeric( $key ) ) {
 
-					// определяется часть имени без индекса
+					// define part of a name without the index
 					$keyPrefix = $prefix . $separator;
 				}
 				else {
 
-					// определяется часть имени с ключом
+					// define part of a name with a key
 					$keyPrefix = $prefix . $key . $separator;
 				}
 			}
 			else {
-				// если массив нумерованный
+				// if it is a numeric array
 				if ( is_numeric( $key ) ) {
 
-					// определяется часть имени без индекса
+					// define part of a name without the index
 					$keyPrefix = '';
 				}
 				else {
 
-					// определяется часть имени с ключом
+					// define part of a name with a key
 					$keyPrefix = $key . $separator;
 				}
 			}
 
-			// если значение является массивом
+			// if the value is an array
 			if ( is_array( $value ) ) {
 
-				// вызывается функция с параметрами
+				// call the function with parameters
 				$values = self::prepareAttributeValues( $value, $delimiter, $values, $keyPrefix );
 
-				// осуществляется переход к следующей итерации
+				// go to the next iteration
 				continue;
 			}
 
-			// к списку значений добавляется имя со своим значением
+			// add name with value to list
 			$values[] = $keyPrefix . $value;
 
 		}
@@ -401,14 +401,14 @@ class Element {
 		// get element content
 		$content = isset( $element['content'] ) ? self::get( $element['content'] ) : '';
 
-		// если элемент парный
+		// if the element is paired
 		if ( ! in_array( $element['type'], [ 'input', ] ) ) {
 
-			// формирование парного элемента
+			// pair element formation
 			$html = "<{$html}>{$content}</{$element['type']}>";
 		}
 		else {
-			// формирование непарного элемента
+			// formation of unpaired elements
 			$html = empty( $element['before'] ) ? "<{$html}/>{$content}" : "{$content}<{$html}/>";
 		}
 
@@ -432,27 +432,26 @@ class Element {
 	 */
 	protected static function useHtmlPattern( array $element, $elementHtml = '' ) {
 
-		// определение html с псевдопеременными
+			// defining of HTML with pseudo elements
 		$html = $element['html'];
 
-		// перебор ключей с определением приоритета замены данных(сперва замена происходит из vars, затем из attributes)
+		// loop for keys with a certain priority
 		foreach ( [ 'vars', 'attributes' ] as $type ) {
 
 			if ( ! empty( $element[ $type ] ) ) {
-				// перебор данных из указанного источника
+				// loop for data from defined source
 				foreach ( $element[ $type ] as $key => $value ) {
 
-					// если значение не является массивом
 					if ( is_string( $key ) ) {
 
-						// в html заменяются все вхождения указанного ключа
+						// replace pseudo values with actual values
 						$html = str_replace( "%{$key}%", $value, $html );
 					}
 				}
 			}
 		}
 
-		// в html заменяется псевдоключ элемента на его html эквивалент
+		// replace pseudo element with actual HTML element
 		$html = str_replace( "%%", $elementHtml, $html );
 
 		return $html;
@@ -516,15 +515,12 @@ class Element {
 		if ( ! is_array( $data ) ) {
 			return $data;
 		}
-		// определяется список сформированных html элементов
+		// list of generated HTML elements
 		$elementsList = [];
 
-		// перебор элементов
+		// loop for elements
 		foreach ( $data as $i => $element ) {
-//if(is_string($element)){
-//	echo '!!! '.$element.' ???';die;
-//}
-			// в список добавляется сформированный элемент
+			// add generated element to the list
 			$elementsList[] = self::prepareElement( $element );
 		}
 
@@ -554,13 +550,13 @@ class Element {
 		// prepare data for converting to HTML
 		$data = self::prepare( $data );
 
-		// определяется список сформированных html элементов
+		// list of generated HTML elements
 		$elementsList = [];
 
-		// перебор элементов
+		// loop for elements
 		foreach ( $data as $i => $element ) {
 
-			// в список добавляется сформированный элемент
+			// add generated element to the list
 			$elementsList[] = self::convertToHtml( $element );
 		}
 
@@ -569,7 +565,7 @@ class Element {
 			return $errors;
 		}
 
-		// список переводится в строку, разделенную по строкам
+		// convert to an array
 		$elementsList = implode( PHP_EOL, $elementsList );
 
 		return $elementsList;

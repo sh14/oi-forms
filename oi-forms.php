@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Oi Forms
  * Plugin URI: https://oiplug.com/plugin/
- * Description: --
+ * Description: Core for form creation plugins. Generates forms from arrays.
  * Author: Alexei Isaenko
  * Version: 1.0.0
  * Author URI: https://oiplug.com/members/isaenkoalexei
@@ -55,7 +55,7 @@ require 'includes/ajax.php';
 require_all_in( Init::$data['theme_path'] . Init::$data['slug'] );
 
 /**
- * Функция обработки запроса на получение данных формы
+ * Getting and processing form data.
  *
  * @param $data
  *
@@ -63,25 +63,25 @@ require_all_in( Init::$data['theme_path'] . Init::$data['slug'] );
  */
 function get_forms( $data ) {
 	$data = wp_parse_args( $data, [
-		// значение опеределяет результат какого метода необходимо вернуть: update, get
+		// name of function which result we gonna get: update, get
 		'request' => 'get',
 	] );
 
-	// преобразование id формы в имя класса с пространством имен
+	// convert form id to class name with namespace
 	$class = str_replace( '/', '\\', $data['form_id'] );
 	$class = str_replace( '-', '\\', $class );
 
-	// если указанный класс существует
+	// pointed class doesn't exists
 	if ( class_exists( $class ) ) {
 
-		// создается эксемпляр класса
+		// create class object
 		$form = new $class( $data );
 
-		// если запрошен один из разрешенных методов и он определен
+		// if requested method is allowed and exists
 		if ( in_array( $data['request'], [ 'get', 'update', ] ) && method_exists( $form, $data['request'] ) ) {
 //			return $data;
 
-			// возвращается рузултат выполнения
+			// result of pointed method
 			return $form->{$data['request']}( $data );
 		}
 
@@ -170,7 +170,7 @@ function bem( $classTrail = '', $toAttribute = false, $isArray = true ) {
 }
 
 /**
- * Функция определения роли текущего пользователя
+ * Check if user can do something.
  *
  * @param $role
  *
@@ -218,31 +218,6 @@ function isRole( $role ) {
 }
 
 /**
- * Определение - может ли текущий пользователь редактировать указанный пост
- *
- * @param $post_id
- *
- * @return bool
- */
-function current_user_can_edit( $post_id ) {
-	if ( isRole( 'admin' ) ) {
-		return true;
-	}
-
-	// получение данных поста из бд
-	$post = get_post( $post_id, ARRAY_A );
-
-	// если текущий пользователь является автором поста или редактором, и при этом пост не опубликован
-	if ( ( get_current_user_id() == $post['post_author'] || isRole( 'editor' ) ) && 'publish' != $post['post_status'] ) {
-
-		return true;
-	}
-
-	return false;
-}
-
-
-/**
  * Подключение всех файлов из указанной папки
  *
  * @param $dir
@@ -284,18 +259,18 @@ function require_all_in( $dir ) {
 
 
 /**
- * ПРИМЕР !!!
+ * Example !!!
  *
- * Фильтр эндпоинтов форм
- * Получение данных формы:
+ * Forms endpoint filters
+ * Getting form's data:
  * GET: /wp-json/forms/---
  * params:
- *   'request' => 'fields', - определяет какое свойство или метод должен быть возвращен, получение полей - fields
+ *   'request' => 'fields', - determine which property or method should be returned, for getting fields - fields
  *
- * Сохранение формы:
+ * Saving form data:
  * POST: /wp-json/forms/post
  * params:
- *   'request' => 'update', - определяет какое свойство или метод должен быть возвращен, сохранение - update
+ *   'request' => 'update', - determine which property or method should be returned, saving form data - update
  *
  * @param $endpoints
  *
@@ -303,9 +278,9 @@ function require_all_in( $dir ) {
  */
 /*
 function forms_endpoints( $endpoints ) {
-	// эндпоинт для работы с
+	// endpoint for working with
 	return array_merge( $endpoints, [
-		// Форма публикации
+		// publication form
 		'post'             => [
 			'methods' => [ WP_REST_Server::READABLE, WP_REST_Server::CREATABLE ],
 		],
