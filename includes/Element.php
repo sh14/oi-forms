@@ -286,6 +286,23 @@ class Element {
 		return $attributesList;
 	}
 
+	/**
+	 * Convert delimiter to an array
+	 *
+	 * @param $delimiter
+	 *
+	 * @return array
+	 */
+	private static function getDelimiter( $delimiter ) {
+		// if the delimiter is not an array
+		if ( ! is_array( $delimiter ) ) {
+
+			// delimiter is converted to an array with one element
+			$delimiter = [ $delimiter ];
+		}
+
+		return $delimiter;
+	}
 
 	/**
 	 * Processing of attributes values lists. Classes or styles for example.
@@ -299,14 +316,7 @@ class Element {
 	 */
 	private static function prepareAttributeValues( array $attributeValues, $delimiter = ' ', $values = [], $prefix = '' ) {
 
-//		$keyPrefix = '';
-
-		// if the delimiter is not an array
-		if ( ! is_array( $delimiter ) ) {
-
-			// delimiter is converted to an array with one element
-			$delimiter = [ $delimiter ];
-		}
+		$delimiter = self::getDelimiter( $delimiter );
 
 		// loop for attribute values
 		foreach ( $attributeValues as $key => $value ) {
