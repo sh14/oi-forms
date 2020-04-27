@@ -13,7 +13,7 @@ abstract class forms {
 	private $action = '';
 	// request method
 	private $method = 'post';
-	// id формы
+	// form id
 	private $id = '';
 	// formed array of form with values
 	protected $form = [];
@@ -23,7 +23,7 @@ abstract class forms {
 	protected $values = [];
 
 	// errors list
-	public $error = [];
+	public $errors = [];
 
 	public function __construct( $request ) {
 
@@ -40,25 +40,8 @@ abstract class forms {
 		}
 
 		// if we have errors
-		if ( ! empty( $this->error ) ) {
-
-			// get names of all class properties
-			$props = array_keys( get_object_vars( $this ) );
-
-			// define error message
-			$error = $this->error;
-
-			// loop for class properties
-			foreach ( $props as $prop ) {
-
-				// set property value
-				$this->$prop = [
-					'errors' => [
-						$error,
-					],
-				];
-			}
-
+		if ( ! empty( $this->errors ) ) {
+			$this->addError();
 		}
 		else {
 			// если передан ключ request и при этом существует такой метод
@@ -83,8 +66,8 @@ abstract class forms {
 	private function addSpecialFields() {
 //		pr( $this->form );
 		// form fields adding
-		$this->form['type']                  = 'form';
-		$this->form['attributes']['id']      = $this->id;
+		$this->form['type']                 = 'form';
+		$this->form['attributes']['id']     = $this->id;
 		$this->form['attributes']['method'] = ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method;
 
 		// добавление поля action, чтобы по нему дергать wp-ajax
@@ -218,6 +201,10 @@ abstract class forms {
 
 			// preparing the data array, with the insertion of the form element into the array, because it must be part of the set
 			$this->form = Element::prepare( [ $this->form ] );
+			if ( Element::isErrors() ) {
+
+				$this->addError( Element::getErrors() );
+			}
 
 			// adding special classes
 			$this->form = $this->addSpecialClasses( $this->form );
@@ -231,7 +218,34 @@ abstract class forms {
 				// setting values to each element
 				$this->form = $this->setValues( $this->form );
 			}
-//			pr($this->form );
+		}
+	}
+
+	/**
+	 * Adding an error to the main errors list and to returnable Class properties.
+	 *
+	 * @param string|array $error
+	 */
+	protected function addError( $error = '' ) {
+		if ( ! empty( $error ) ) {
+			if ( is_string( $error ) ) {
+				$this->errors[] = $error;
+			}
+			else if ( is_array( $error ) ) {
+				$this->errors = array_merge( $this->errors, $error );
+			}
+		}
+
+		// get names of returnable properties
+		$props = [ 'data', 'form', 'values' ];
+
+		// loop for properties
+		foreach ( $props as $prop ) {
+
+			// set property value
+			$this->$prop = [
+				'errors' => $this->errors,
+			];
 		}
 	}
 
@@ -242,8 +256,8 @@ abstract class forms {
 	 */
 	private function get_form_vue() {
 
-		$form   = $this->form;
-		if(empty($form['content'])){
+		$form = $this->form;
+		if ( empty( $form['content'] ) ) {
 			$form['content'] = [];
 		}
 		$fields = array_values( $form['content'] );
@@ -331,7 +345,7 @@ abstract class forms {
 		if ( ! empty( $this->data['errors'] ) ) {
 			return $this->data;
 		}
-		// построение формы с обязательными полями и значениями
+		// build the form with necessary fields and values
 		$this->build( $request );
 
 		// return data if it has errors
