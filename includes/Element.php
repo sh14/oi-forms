@@ -291,7 +291,7 @@ class Element {
 	 * Processing of attributes values lists. Classes or styles for example.
 	 *
 	 * @param array  $attributeValues
-	 * @param string $delimiter
+	 * @param string|array $delimiter
 	 * @param array  $values
 	 * @param string $prefix
 	 *
@@ -506,7 +506,7 @@ class Element {
 	 *
 	 * @param $data
 	 *
-	 * @return array|bool|string
+	 * @return array
 	 */
 	public static function prepare( $data ) {
 		static::init();
@@ -522,11 +522,6 @@ class Element {
 		foreach ( $data as $i => $element ) {
 			// add generated element to the list
 			$elementsList[] = self::prepareElement( $element );
-		}
-
-		if ( ! empty( $errors = self::isErrors() ) ) {
-
-			return $errors;
 		}
 
 		return $elementsList;
@@ -549,6 +544,11 @@ class Element {
 
 		// prepare data for converting to HTML
 		$data = self::prepare( $data );
+
+		if ( ! empty( $errors = self::isErrors() ) ) {
+
+			return $errors;
+		}
 
 		// list of generated HTML elements
 		$elementsList = [];
