@@ -81,10 +81,7 @@ $form = [
 			],
 			[
 				'type'       => 'input',
-				'attributes'=>[
-					'name'      => 'categories[]',
-					'value'      => 'text 4',
-				],
+//				'attributes'=>'!!!!!!!!!!!!!!!!!!!!!!!!!!',
 				'html'    => '<div class="form__control">%%</div>',
 			],
 			[
@@ -102,7 +99,7 @@ $form = [
 	],
 ];
 
-print_r( Element::prepare( $form ) );
+//print_r( Element::prepare( $form ) );
 pr( Element::get( $form ) );
 
 // eof
