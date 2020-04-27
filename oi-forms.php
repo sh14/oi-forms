@@ -14,32 +14,6 @@
 
 namespace forms;
 
-//use WP_REST_Server;
-
-
-function pr( $line, $d = [], $specialchars = false ) {
-
-
-	ob_start();
-
-	print_r( $d );
-	$out = ob_get_contents();
-	ob_clean();
-	if ( ! empty( $specialchars ) ) {
-		$out = htmlspecialchars( $out );
-	}
-	echo '<pre>';
-	echo 'Line: ' . $line . '<br>';
-	echo $out;
-	echo '</pre><hr>';
-}
-
-function is_json( $data ) {
-	json_decode( $data, true );
-
-	return json_last_error() == JSON_ERROR_NONE;
-}
-
 require 'Init.php';
 // init
 Init::init();
@@ -48,7 +22,7 @@ require 'includes/Element.php';
 require 'includes/Gutenberg.php';
 require 'includes/shortcode.php';
 require 'includes/ajax.php';
-//require 'includes/rest-api.php';
+require 'includes/rest-api.php';
 
 
 // require forms from active theme
@@ -218,20 +192,20 @@ function isRole( $role ) {
 }
 
 /**
- * Подключение всех файлов из указанной папки
+ * Require all files from given directory.
  *
- * @param $dir
+ * @param string $dir
+ *
+ * @return bool
  */
-function require_all_in( $dir ) {
-
+function require_all_in( $dir = '' ) {
+	if ( empty( $dir ) ) {
+		return false;
+	}
 	$dir = '/' . trim( $dir, '/' ) . '/';
 
 	if ( is_dir( $dir ) ) {
 		$files = scandir( $dir );
-//		print '<pre class="hidden">';
-//		print_r( $dir );
-//		print_r( $files );
-//		print '</pre>';
 
 		if ( ! empty( $files ) && is_array( $files ) ) {
 
@@ -253,54 +227,9 @@ function require_all_in( $dir ) {
 					}
 				}
 			}
+			return true;
 		}
 	}
 }
-
-
-/**
- * Example !!!
- *
- * Forms endpoint filters
- * Getting form's data:
- * GET: /wp-json/forms/---
- * params:
- *   'request' => 'fields', - determine which property or method should be returned, for getting fields - fields
- *
- * Saving form data:
- * POST: /wp-json/forms/post
- * params:
- *   'request' => 'update', - determine which property or method should be returned, saving form data - update
- *
- * @param $endpoints
- *
- * @return array
- */
-/*
-function forms_endpoints( $endpoints ) {
-	// endpoint for working with
-	return array_merge( $endpoints, [
-		// publication form
-		'post'             => [
-			'methods' => [ WP_REST_Server::READABLE, WP_REST_Server::CREATABLE ],
-		],
-	] );
-}
-
-add_filter( 'forms_endpoints_filter', __NAMESPACE__ . '\\' . 'forms_endpoints', 10, 1 );
-*/
-
-function register_scripts() {
-	wp_register_script(
-		'oijq',
-		get_site_url() . '/oijq/js/oijq.js',
-		[],
-		Init::$data['version'],
-		true
-	);
-}
-
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\register_scripts' );
-
 
 // eof
