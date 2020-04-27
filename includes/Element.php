@@ -7,9 +7,6 @@
 
 namespace Elements;
 
-
-use forms\Init;
-
 class Element {
 	public static $domain = __NAMESPACE__;
 	public static $attributes = [];
@@ -43,7 +40,6 @@ class Element {
 	];
 
 	protected static function init() {
-
 		self::$attributes = self::attributes();
 	}
 
@@ -308,10 +304,10 @@ class Element {
 	/**
 	 * Processing of attributes values lists. Classes or styles for example.
 	 *
-	 * @param array  $attributeValues
+	 * @param array        $attributeValues
 	 * @param string|array $delimiter
-	 * @param array  $values
-	 * @param string $prefix
+	 * @param array        $values
+	 * @param string       $prefix
 	 *
 	 * @return array - list of string values, generated for the specified attribute
 	 */
@@ -443,7 +439,7 @@ class Element {
 	 */
 	protected static function useHtmlPattern( array $element, $elementHtml = '' ) {
 
-			// defining of HTML with pseudo elements
+		// defining of HTML with pseudo elements
 		$html = $element['html'];
 
 		// loop for keys with a certain priority
@@ -471,19 +467,22 @@ class Element {
 	/**
 	 * Prepare element array
 	 *
-	 * @param array $element
+	 * @param array      $element
+	 * @param int|string $index
 	 *
 	 * @return array
 	 */
-	protected static function prepareElement( array $element ) {
-		// return empty string if type not set
-		if ( empty( $element['type'] ) ) {
-			self::$errors[] = __( 'The element type was not specified.', Init::$data['domain'] );
+	protected static function prepareElement( array $element, $index ) {
+
+		$element = self::setElementProps( $element, $index );
+
+		// if attributes is not an array
+		if ( ! empty( $element['attributes'] ) && ! is_array( $element['attributes'] ) ) {
+			// add an error
+			self::addError( __( sprintf( 'Attributes must have an array type. Check the "%s" in "%s" element.', $element['attributes'], $element['type'] ), self::$domain ) );
 
 			return [];
 		}
-
-		$element['type'] = strtolower( $element['type'] );
 
 		// if user set input type as element type
 		if ( in_array( $element['type'], self::$inputTypes ) ) {
@@ -501,6 +500,7 @@ class Element {
 
 		// if attributes has been set
 		if ( ! empty( $element['attributes'] ) ) {
+
 			// prepare attributes
 			$element['attributes'] = self::prepareAttributes( $element['attributes'] );
 		}
@@ -531,11 +531,104 @@ class Element {
 
 		// loop for elements
 		foreach ( $data as $i => $element ) {
+
 			// add generated element to the list
-			$elementsList[] = self::prepareElement( $element );
+			$elementsList[] = self::prepareElement( $element, $i );
 		}
 
 		return $elementsList;
+	}
+
+	/**
+	 * Set element name from a shorthands.
+	 *
+	 * @param array      $element
+	 * @param int|string $index
+	 *
+	 * @return array
+	 */
+	private static function setElementName( array $element, $index ) {
+		// if element has a key instead of index
+		if ( ! is_numeric( $index ) ) {
+			if ( empty( $element['attributes'] ) ) {
+				$element['attributes'] = [];
+			}
+			// set element type equal to element key
+			$element['attributes']['name'] = $index;
+		}
+
+		return $element;
+	}
+
+	/**
+	 * Set element name from a shorthands.
+	 *
+	 * @param array $element
+	 *
+	 * @return array
+	 */
+	private static function setElementType( array $element ) {
+		// loop for element items
+		foreach ( $element as $key => $value ) {
+			// if we have a string value with index instead of key
+			if ( is_numeric( $key ) && is_string( $value ) ) {
+				// set the value as an element type
+				$element['type'] = $value;
+				unset( $element[ $key ] );
+			}
+		}
+
+		// if element type is empty
+		if ( empty( $element['type'] ) ) {
+			// set div as a type
+			$element['type'] = 'div';
+		}
+
+		$element['type'] = strtolower( $element['type'] );
+
+		return $element;
+	}
+
+	/**
+	 * If element attributes has not be set in a right way then get them from a shorthand.
+	 *
+	 * @param array $element
+	 *
+	 * @return array
+	 */
+	private static function setElementAttributes( array $element ) {
+		// loop for element items
+		foreach ( $element as $key => $value ) {
+			// if we have a string value with index instead of key
+			if ( is_numeric( $key ) && is_array( $value ) ) {
+				// set the value as an element type
+				$element['attributes'] = $value;
+				unset( $element[ $key ] );
+			}
+		}
+
+		if ( empty( $element['attributes'] ) ) {
+			$element['attributes'] = [];
+		}
+
+		return $element;
+	}
+
+	/**
+	 * Set element properties.
+	 *
+	 * @param array      $element
+	 * @param int|string $index
+	 *
+	 * @return array
+	 */
+	private static function setElementProps( array $element, $index ) {
+
+		$element = self::setElementType( $element );
+		$element = self::setElementAttributes( $element );
+		$element = self::setElementName( $element, $index );
+
+		return $element;
 	}
 
 	/**
@@ -564,11 +657,16 @@ class Element {
 		// list of generated HTML elements
 		$elementsList = [];
 
-		// loop for elements
-		foreach ( $data as $i => $element ) {
+		if ( is_array( $data ) ) {
+			// loop for elements
+			foreach ( $data as $i => $element ) {
 
-			// add generated element to the list
-			$elementsList[] = self::convertToHtml( $element );
+				// add generated element to the list
+				$elementsList[] = self::convertToHtml( $element );
+			}
+		}
+		else {
+			$elementsList[] = $data;
 		}
 
 		if ( self::isErrors() ) {
@@ -623,5 +721,7 @@ class Element {
 
 		return false;
 	}
+
+
 }
 // eof
