@@ -317,6 +317,45 @@ print_r( Element::get( $form ) );
 
 ```
 
+### Request data via Rest API
+
+To add your own endpoints you can write a filter function:
+```$php
+/**
+ * Forms endpoint filters
+ *
+ * @param $endpoints
+ *
+ * @return array
+ */
+function forms_endpoints( $endpoints ) {
+	// endpoint for working with
+	return array_merge( $endpoints, [
+		// publication form
+		'form'             => [
+			'methods' => [ WP_REST_Server::READABLE, WP_REST_Server::CREATABLE ],
+		],
+	] );
+}
+
+add_filter( 'forms_endpoints_filter', __NAMESPACE__ . '\\' . 'forms_endpoints', 10, 1 );
+``` 
+
+#### Getting form's data
+
+GET: `/wp-json/forms/form/?request=get&response=vue&form_id=<form id like in shortcode>`
+
+params:
+
+ * `'request' => 'get'` - determine which property or method should be returned
+ * `'response'=> 'json'` - response format: html/vue/json 
+ 
+#### Saving form data:
+POST: `/wp-json/forms/form`
+
+params:
+
+* `'request' => 'update'` - determine which property or method should be returned
 
 ### Redirect
 
