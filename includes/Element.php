@@ -210,7 +210,7 @@ class Element {
 			if ( true == $attributes[ $key ]['required'] && false === $attributes[ $key ]['hideEmpty'] && empty( $value ) ) {
 
 				// add an error
-				self::$errors[] = __( sprintf( 'Key "%s" is required.', $key ), Init::$data['domain'] );
+				self::addError( __( sprintf( 'Key "%s" is required.', $key ), self::$domain ) );
 
 				// return empty value
 				return [];
@@ -555,9 +555,9 @@ class Element {
 		// prepare data for converting to HTML
 		$data = self::prepare( $data );
 
-		if ( ! empty( $errors = self::isErrors() ) ) {
+		if ( self::isErrors() ) {
 
-			return $errors;
+			return self::getErrors();
 		}
 
 		// list of generated HTML elements
@@ -570,9 +570,9 @@ class Element {
 			$elementsList[] = self::convertToHtml( $element );
 		}
 
-		if ( ! empty( $errors = self::isErrors() ) ) {
+		if ( self::isErrors() ) {
 
-			return $errors;
+			return self::getErrors();
 		}
 
 		// convert to an array
@@ -581,11 +581,43 @@ class Element {
 		return $elementsList;
 	}
 
-	protected static function isErrors() {
+	/**
+	 * Adding an error to the list.
+	 *
+	 * @param string $error
+	 */
+	protected static function addError( string $error ) {
+		if ( ! empty( $error ) ) {
+			self::$errors[] = $error;
+		}
+	}
+
+	/**
+	 * Check if there errors.
+	 *
+	 * @return bool
+	 */
+	public static function isErrors() {
+		return ! empty( self::$errors );
+	}
+
+	/**
+	 * Get errors list.
+	 *
+	 * @param bool $asArray
+	 *
+	 * @return array|bool|string
+	 */
+	public static function getErrors( $asArray = false ) {
 		if ( ! empty( self::$errors ) ) {
-			return join( PHP_EOL, array_map( function ( $item ) {
-				return '<p class="error">' . $item . '</p>';
-			}, self::$errors ) );
+			if ( empty( $asArray ) ) {
+				return join( PHP_EOL, array_map( function ( $item ) {
+					return '<p class="error">' . $item . '</p>';
+				}, self::$errors ) );
+			}
+			else {
+				return self::$errors;
+			}
 		}
 
 		return false;
