@@ -11,6 +11,7 @@ namespace Elements;
 use forms\Init;
 
 class Element {
+	public static $domain = __NAMESPACE__;
 	public static $attributes = [];
 	public static $ids = [];
 	public static $id = '';
