@@ -20,7 +20,8 @@ function rest_api_endpoints() {
 	foreach ( $endpoints as $endpoint => $data ) {
 
 		// поверяется существование указанного класса, который должен лежать в томже пространстве имен
-		if ( class_exists( '\\' . __NAMESPACE__ . '\\' . $endpoint ) ) {
+//		if ( class_exists( '\\' . __NAMESPACE__ . '\\' . $endpoint ) )
+		{
 
 			// определение функции обработки rest api запроса
 			$data['callback'] = '\\' . __NAMESPACE__ . '\\' . 'forms_rest_api';
