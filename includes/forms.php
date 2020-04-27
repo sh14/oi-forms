@@ -83,10 +83,8 @@ abstract class forms {
 	private function addSpecialFields() {
 //		pr( $this->form );
 		// form fields adding
-		$this->form['type']                  = 'Form';
+		$this->form['type']                  = 'form';
 		$this->form['attributes']['id']      = $this->id;
-		$this->form['attributes']['class'][] = 'form';
-//		$this->form['attributes']['class'][] = 'js-oi-forms';
 		$this->form['attributes']['method'] = ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method;
 
 		// добавление поля action, чтобы по нему дергать wp-ajax
@@ -245,6 +243,9 @@ abstract class forms {
 	private function get_form_vue() {
 
 		$form   = $this->form;
+		if(empty($form['content'])){
+			$form['content'] = [];
+		}
 		$fields = array_values( $form['content'] );
 
 		foreach ( $fields as $i => $field ) {
