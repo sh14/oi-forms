@@ -477,7 +477,7 @@ class Element {
 		$element = self::setElementProps( $element, $index );
 
 		// if attributes is not an array
-		if ( ! empty( $element['attributes'] ) && ! is_array( $element['attributes'] ) ) {
+		if ( isset( $element['attributes'] ) && ! is_array( $element['attributes'] ) ) {
 			// add an error
 			self::addError( __( sprintf( 'Attributes must have an array type. Check the "%s" in "%s" element.', $element['attributes'], $element['type'] ), self::$domain ) );
 
@@ -552,6 +552,12 @@ class Element {
 		if ( ! is_numeric( $index ) ) {
 			if ( empty( $element['attributes'] ) ) {
 				$element['attributes'] = [];
+			}
+
+			if ( ! is_array( $element['attributes'] ) ) {
+				self::addError( __( sprintf( 'Attributes must have an array type. Check the "%s" in "%s" element.', $element['attributes'], $element['type'] ), self::$domain ) );
+
+				return [];
 			}
 			// set element type equal to element key
 			$element['attributes']['name'] = $index;
@@ -703,23 +709,10 @@ class Element {
 	/**
 	 * Get errors list.
 	 *
-	 * @param bool $asArray
-	 *
-	 * @return array|bool|string
+	 * @return array
 	 */
-	public static function getErrors( $asArray = false ) {
-		if ( ! empty( self::$errors ) ) {
-			if ( empty( $asArray ) ) {
-				return join( PHP_EOL, array_map( function ( $item ) {
-					return '<p class="error">' . $item . '</p>';
-				}, self::$errors ) );
-			}
-			else {
-				return self::$errors;
-			}
-		}
-
-		return false;
+	public static function getErrors() {
+		return self::$errors;
 	}
 
 
