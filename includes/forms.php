@@ -44,16 +44,12 @@ abstract class forms {
 			$this->addError();
 		}
 		else {
-			// если передан ключ request и при этом существует такой метод
+			// if request key has been sent and same method exists
 			if ( ! empty( $request['request'] ) && method_exists( $this, $request['request'] ) ) {
 
-				// определение имени метода
-				$method = $request['request'];
+				if ( 'update' == $request['request'] ) {
 
-				// если метод update
-				if ( 'update' == $method ) {
-
-					// обнуление выдачи
+					// reset response data
 					$this->data = [];
 				}
 			}
@@ -70,7 +66,7 @@ abstract class forms {
 		$this->form['attributes']['id']     = $this->id;
 		$this->form['attributes']['method'] = ! empty( $this->form['method'] ) ? $this->form['method'] : $this->method;
 
-		// добавление поля action, чтобы по нему дергать wp-ajax
+		// add "action" field to make wp-ajax works
 		$this->form['content'][] = [
 			'type'       => 'hidden',
 			'attributes' => [
@@ -80,7 +76,7 @@ abstract class forms {
 		];
 
 
-		// добавление поля request, чтобы при отправке формы происходило ее сохранение
+		// add "request" field for updating form on submit
 		$this->form['content'][] = [
 			'type'       => 'hidden',
 			'attributes' => [
@@ -266,10 +262,10 @@ abstract class forms {
 
 			if ( ! empty( $fields[ $i ]['type'] ) ) {
 
-				// приведение типа к нижнему регистру
+				// set type to lower case
 				$fields[ $i ]['type'] = strtolower( $fields[ $i ]['type'] );
 
-				// выполнение действий, если тип равен указанному
+				// if field type is
 				switch ( $fields[ $i ]['type'] ) {
 					case 'submit':
 					case 'multiselect':
