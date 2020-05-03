@@ -1,15 +1,14 @@
 <?php
 /**
  * Plugin Name: Oi Forms
- * Plugin URI: https://oiplug.com/plugin/
+ * Plugin URI: https://sh14.ru/plugin/oi-forms
  * Description: Core for form creation plugins. Generates forms from arrays.
  * Author: Alexei Isaenko
- * Version: 2.1.0
- * Author URI: https://oiplug.com/members/isaenkoalexei
+ * Version: 1.0.0
+ * Author URI: https://sh14.ru/user/1
  * Text Domain: oi-forms
  * Domain Path: /language
  * Date: 2019-02-25
- * @author Isaenko Alexey <info@oiplug.com>
  */
 
 namespace forms;
@@ -18,7 +17,7 @@ require 'Init.php';
 // init
 Init::init();
 require 'includes/forms.php';
-require 'includes/Element.php';
+require 'modules/Element/Element.php';
 require 'includes/Gutenberg.php';
 require 'includes/shortcode.php';
 require 'includes/ajax.php';

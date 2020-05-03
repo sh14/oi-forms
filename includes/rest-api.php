@@ -1,7 +1,7 @@
 <?php
 /**
  * Date: 2019-02-25
- * @author Isaenko Alexey <info@oiplug.com>
+ * @author Alex Isaenko <info@sh14.ru>
  */
 
 namespace forms;

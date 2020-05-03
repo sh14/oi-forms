@@ -1,7 +1,7 @@
 <?php
 /**
  * Date: 2020-04-07
- * @author Isaenko Alexey <info@oiplug.com>
+ * @author Alex Isaenko <info@sh14.ru>
  */
 
 

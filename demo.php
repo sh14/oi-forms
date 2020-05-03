@@ -1,18 +1,14 @@
 <?php
 /**
  * Date: 2019-05-05
- * @author Isaenko Alexey <info@oiplug.com>
+ * @author Alex Isaenko <info@sh14.ru>
  */
 
 namespace Elements;
 function __( $text, $domain ) {
 	return $text;
 }
-function pr($d){
-	echo '<pre>';
-	print_r($d);
-	echo '</pre>';
-}
+
 require 'includes/Element.php';
 
 $form = [
@@ -100,6 +96,6 @@ $form = [
 ];
 
 //print_r( Element::prepare( $form ) );
-pr( Element::get( $form ) );
+print_r( Element::get( $form ) );
 
 // eof
