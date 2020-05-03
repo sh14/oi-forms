@@ -4,7 +4,7 @@
  * Plugin URI: https://oiplug.com/plugin/
  * Description: Core for form creation plugins. Generates forms from arrays.
  * Author: Alexei Isaenko
- * Version: 2.0.0
+ * Version: 2.1.0
  * Author URI: https://oiplug.com/members/isaenkoalexei
  * Text Domain: oi-forms
  * Domain Path: /language
